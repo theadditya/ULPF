@@ -221,7 +221,13 @@ function renderResults(data) {
     }
     const narrativeIcon = document.getElementById('narrative-icon');
     if (narrativeIcon) {
-        narrativeIcon.innerText = isThreat ? '🚨' : (isAllowed ? '✅' : '🛡️');
+        if (isThreat) {
+            narrativeIcon.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+        } else if (isAllowed) {
+            narrativeIcon.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>`;
+        } else {
+            narrativeIcon.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
+        }
     }
 
     // Inspection Flow Center Gateway
@@ -298,11 +304,11 @@ function renderResults(data) {
     const threatEl = document.getElementById('summary-threat');
     if (threatEl) {
         if (isThreat) {
-            threatEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">🚨 ${event.threat.signature_name}</span>`;
+            threatEl.innerHTML = `<span style="color:var(--danger); font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> ${event.threat.signature_name}</span>`;
         } else if (!isAllowed) {
-            threatEl.innerHTML = `<span style="color:var(--warning); font-weight:700;">🛡️ Suspicious Ingress Blocked</span>`;
+            threatEl.innerHTML = `<span style="color:var(--warning); font-weight:700; display:inline-flex; align-items:center; gap:0.35rem;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Suspicious Ingress Blocked</span>`;
         } else {
-            threatEl.innerHTML = `<span style="color:var(--success); font-weight:600;">Clean (Zero Active IoCs)</span>`;
+            threatEl.innerHTML = `<span style="color:var(--success); font-weight:600; display:inline-flex; align-items:center; gap:0.35rem;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Clean (Zero Active IoCs)</span>`;
         }
     }
 
@@ -412,23 +418,28 @@ function renderMlVectorTab(data) {
     // Feature Categories Definition
     const categories = [
         {
-            title: '🌐 Network Topology & Scope',
+            title: 'Network Topology & Scope',
+            iconSvg: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,
             keys: ['src_port', 'dst_port', 'is_well_known_port', 'is_ephemeral_src_port', 'is_internal_src', 'is_internal_dst']
         },
         {
-            title: '🔄 Traffic Flow & Directionality',
+            title: 'Traffic Flow & Directionality',
+            iconSvg: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`,
             keys: ['direction_inbound', 'direction_outbound', 'direction_lateral', 'direction_external']
         },
         {
-            title: '📡 Layer 4 Transport Protocols',
+            title: 'Layer 4 Transport Protocols',
+            iconSvg: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path></svg>`,
             keys: ['proto_tcp', 'proto_udp', 'proto_icmp', 'proto_other']
         },
         {
-            title: '📊 Volume & Log-Scale Traffic Metrics',
+            title: 'Volume & Log-Scale Traffic Metrics',
+            iconSvg: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
             keys: ['bytes_in_log', 'bytes_out_log', 'total_bytes_log', 'bytes_ratio_out_in', 'packets_total_log', 'duration_sec', 'bytes_per_second']
         },
         {
-            title: '🛡️ Security Posture & Anomaly Signals',
+            title: 'Security Posture & Anomaly Signals',
+            iconSvg: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
             keys: ['action_blocked', 'action_allowed', 'severity_level', 'threat_flag', 'threat_confidence']
         }
     ];
@@ -438,7 +449,7 @@ function renderMlVectorTab(data) {
     categories.forEach(cat => {
         html += `
             <div class="ml-cat-box">
-                <h4 class="ml-cat-title">${cat.title}</h4>
+                <h4 class="ml-cat-title">${cat.iconSvg} <span>${cat.title}</span></h4>
                 <div class="ml-grid-layout">
         `;
 
@@ -600,19 +611,19 @@ function showToast(msg) {
     const toast = document.getElementById('toast');
     if (!toast) return;
 
-    // Pick contextual icon based on message
-    let icon = '⚡';
+    // Pick contextual SVG icon based on message
+    let icon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
     const lower = msg.toLowerCase();
     if (lower.includes('air-gapped') || lower.includes('isolated')) {
-        icon = '🔒';
+        icon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
     } else if (lower.includes('cloud') || lower.includes('web')) {
-        icon = '🌐';
+        icon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
     } else if (lower.includes('loaded') || lower.includes('fleet') || lower.includes('sample')) {
-        icon = '📦';
+        icon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`;
     } else if (lower.includes('copied')) {
-        icon = '✓';
+        icon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
     } else if (lower.includes('error') || lower.includes('failed')) {
-        icon = '⚠️';
+        icon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
     }
 
     toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${msg}</span>`;

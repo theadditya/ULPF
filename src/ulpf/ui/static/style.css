@@ -538,6 +538,9 @@ body {
 }
 
 .sp-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -545,6 +548,12 @@ body {
     border: 1px solid var(--border-color);
     padding: 0.25rem 0.65rem;
     border-radius: 9999px;
+    transition: all 0.2s ease;
+}
+
+.sp-pill svg {
+    flex-shrink: 0;
+    color: var(--text-secondary);
 }
 
 /* ==========================================================================
@@ -846,7 +855,11 @@ textarea#raw-log-input:focus {
 }
 
 .narrative-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1rem;
+    color: var(--primary);
 }
 
 .narrative-label {
@@ -1179,10 +1192,17 @@ textarea#raw-log-input:focus {
 }
 
 .phase-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     font-size: 0.72rem;
     font-weight: 700;
     padding: 0.2rem 0.55rem;
     border-radius: 6px;
+}
+
+.phase-status-badge svg {
+    flex-shrink: 0;
 }
 
 .status-green {
@@ -1325,6 +1345,9 @@ textarea#raw-log-input:focus {
 }
 
 .sink-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     padding: 0.35rem 0.65rem;
@@ -1332,6 +1355,30 @@ textarea#raw-log-input:focus {
     font-size: 0.74rem;
     color: var(--text-primary);
     font-weight: 600;
+}
+
+.sink-badge svg {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.inline-flex-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.inline-flex-link:hover {
+    text-decoration: underline;
+}
+
+.tag-arrow {
+    display: inline-block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin: 0 0.25rem;
 }
 
 /* ==========================================================================
