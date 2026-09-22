@@ -595,12 +595,33 @@ function copyMlVector(format) {
     });
 }
 
+let toastTimeout = null;
 function showToast(msg) {
     const toast = document.getElementById('toast');
     if (!toast) return;
-    toast.innerText = msg;
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 2200);
+
+    // Pick contextual icon based on message
+    let icon = '⚡';
+    const lower = msg.toLowerCase();
+    if (lower.includes('air-gapped') || lower.includes('isolated')) {
+        icon = '🔒';
+    } else if (lower.includes('cloud') || lower.includes('web')) {
+        icon = '🌐';
+    } else if (lower.includes('loaded') || lower.includes('fleet') || lower.includes('sample')) {
+        icon = '📦';
+    } else if (lower.includes('copied')) {
+        icon = '✓';
+    } else if (lower.includes('error') || lower.includes('failed')) {
+        icon = '⚠️';
+    }
+
+    toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${msg}</span>`;
+    toast.classList.add('visible');
+
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove('visible');
+    }, 3200);
 }
 
 function toggleHelpModal() {
