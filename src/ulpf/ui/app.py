@@ -26,10 +26,27 @@ from ulpf.ingestion.file_reader import FileIngestionReader
 # Global paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 CONFIGS_DIR = os.path.join(BASE_DIR, "configs", "parsers")
-DATA_DIR = os.path.join(BASE_DIR, "data")
 SAMPLE_LOGS_FILE = os.path.join(BASE_DIR, "sample_logs", "perimeter_devices.log")
 
-Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
+# Robust writable DATA_DIR detection for serverless (Vercel / Lambda) environments
+data_dir_env = os.environ.get("ULPF_DATA_DIR")
+if data_dir_env:
+    DATA_DIR = data_dir_env
+elif os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DATA_DIR = "/tmp/ulpf_data"
+else:
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+
+try:
+    Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
+    # Writability sanity check
+    test_path = os.path.join(DATA_DIR, ".write_test")
+    with open(test_path, "w") as f:
+        f.write("1")
+    os.remove(test_path)
+except OSError:
+    DATA_DIR = "/tmp/ulpf_data"
+    Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
 
 # Initialize registry, sinks, pipeline
 registry = ParserRegistry(CONFIGS_DIR)
@@ -72,7 +89,8 @@ async def serve_dashboard():
 from ulpf.enrichment.mitre_compliance import SecurityIntelligenceEngine
 from ulpf.normalization.exporters import MultiSchemaExporter
 
-DEPLOYMENT_MODE = os.environ.get("ULPF_DEPLOYMENT_MODE", "air_gapped")  # "air_gapped" or "internet"
+default_mode = "internet" if (os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")) else "air_gapped"
+DEPLOYMENT_MODE = os.environ.get("ULPF_DEPLOYMENT_MODE", default_mode)  # "air_gapped" or "internet"
 
 
 @app.get("/api/v1/system/mode")

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "framework": null,
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "configs/**,sample_logs/**,src/ulpf/ui/static/**",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.py"
+    }
+  ]
+}
