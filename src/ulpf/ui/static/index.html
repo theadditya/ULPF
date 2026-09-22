@@ -67,54 +67,72 @@
         </div>
     </header>
 
-    <!-- Sub-Navbar: Operational Banner -->
-    <section class="sub-bar">
-        <div class="subbar-badges">
-            <span class="subbar-item">
-                <strong class="text-cyan">Deployment:</strong>
-                <span id="subbar-mode-desc">100% Offline Local Engine (No external API calls, defense enclave mode)</span>
-            </span>
-            <span class="subbar-divider">|</span>
-            <span class="subbar-item">
-                <strong>Taxonomy:</strong> OCSF Class 4001 &bull; Elastic ECS &bull; Unified SIEM Alert JSON
-            </span>
-        </div>
-        <div class="subbar-actions">
-            <button class="btn-text-sm" onclick="loadSampleDataset()">⚡ Ingest Perimeter Fleet Samples</button>
-        </div>
-    </section>
-
-    <!-- Telemetry Cards Bar -->
-    <section class="telemetry-grid">
-        <div class="stat-box">
-            <span class="stat-title">Total Ingested Events</span>
-            <div class="stat-metric-row">
-                <h3 class="stat-number" id="stat-total">0</h3>
-                <span class="stat-trend">EPS Ready</span>
+    <!-- Hero Showcase Section (Nixtio-Inspired Minimalist Card) -->
+    <section class="nixtio-hero-section">
+        <div class="nixtio-hero-card">
+            <div class="hero-top-row">
+                <div class="hero-badge-pill">
+                    <span class="hero-pulse-dot"></span>
+                    <span>Universal Log Pre-processing Framework &bull; OCSF v1.2 Standard</span>
+                </div>
+                <div class="hero-mode-badge">
+                    <span class="hero-mode-indicator" id="hero-mode-indicator">🔒</span>
+                    <span id="subbar-mode-desc">100% Offline Local Engine (No external API calls, defense enclave mode)</span>
+                </div>
             </div>
-        </div>
 
-        <div class="stat-box">
-            <span class="stat-title">Sub-Millisecond Latency</span>
-            <div class="stat-metric-row">
-                <h3 class="stat-number" id="stat-latency">0.12 ms</h3>
-                <span class="stat-badge-green">Median p50</span>
+            <div class="hero-headline-wrap">
+                <h1 class="hero-headline">Universal Telemetry Normalization for Modern Security Operations.</h1>
+                <p class="hero-subheadline">
+                    Transform raw, heterogeneous perimeter logs into standardized, lossless OCSF Class 4001 events, MITRE ATT&amp;CK context, and 26-D AI/ML feature vectors in sub-millisecond real time.
+                </p>
             </div>
-        </div>
 
-        <div class="stat-box">
-            <span class="stat-title">Active Perimeter Parsers</span>
-            <div class="stat-metric-row">
-                <h3 class="stat-number" id="stat-parsers">9 Loaded</h3>
-                <span class="stat-trend">Declarative YAML</span>
+            <div class="hero-action-row">
+                <button class="btn btn-primary btn-pill" onclick="loadSampleDataset()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    Ingest Perimeter Fleet Samples
+                </button>
+                <div class="hero-tech-pills">
+                    <span class="hero-tech-tag">⚡ Sub-Millisecond Engine</span>
+                    <span class="hero-tech-tag">🛡️ 100% Zero Information Loss</span>
+                    <span class="hero-tech-tag">📦 Apache Parquet + SQLite + JSON-L Sinks</span>
+                </div>
             </div>
-        </div>
 
-        <div class="stat-box">
-            <span class="stat-title">Forensic Lossless Rate</span>
-            <div class="stat-metric-row">
-                <h3 class="stat-number text-green" id="stat-integrity">100.0%</h3>
-                <span class="stat-badge-green">SHA-256 Proven</span>
+            <!-- Telemetry Stats Grid (Nixtio Minimalist Metric Tiles) -->
+            <div class="hero-stats-grid">
+                <div class="hero-stat-tile">
+                    <div class="hs-metric-row">
+                        <h3 class="stat-number" id="stat-latency">0.12 ms</h3>
+                        <span class="hs-badge hs-badge-green">Median p50</span>
+                    </div>
+                    <span class="hs-label">Ingestion &amp; Normalization Latency</span>
+                </div>
+
+                <div class="hero-stat-tile">
+                    <div class="hs-metric-row">
+                        <h3 class="stat-number text-green" id="stat-integrity">100.0%</h3>
+                        <span class="hs-badge hs-badge-green">SHA-256 Proven</span>
+                    </div>
+                    <span class="hs-label">Bit-for-Bit Lossless Retention</span>
+                </div>
+
+                <div class="hero-stat-tile">
+                    <div class="hs-metric-row">
+                        <h3 class="stat-number text-cyan" id="stat-parsers">10 Loaded</h3>
+                        <span class="hs-badge hs-badge-cyan">Zero-Shot Heuristic</span>
+                    </div>
+                    <span class="hs-label">Declarative Perimeter Parsers</span>
+                </div>
+
+                <div class="hero-stat-tile">
+                    <div class="hs-metric-row">
+                        <h3 class="stat-number" id="stat-total">0</h3>
+                        <span class="hs-badge hs-badge-blue">EPS Scalable</span>
+                    </div>
+                    <span class="hs-label">Total Ingested Events</span>
+                </div>
             </div>
         </div>
     </section>
