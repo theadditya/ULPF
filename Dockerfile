@@ -22,7 +22,7 @@ RUN groupadd -r ulpf && useradd -r -g ulpf -u 10001 ulpf
 
 COPY --from=builder /root/.local /home/ulpf/.local
 ENV PATH=/home/ulpf/.local/bin:$PATH
-ENV PYTHONPATH=/app/src:$PYTHONPATH
+ENV PYTHONPATH=/app/src:/home/ulpf/.local/lib/python3.12/site-packages:$PYTHONPATH
 ENV PYTHONUNBUFFERED=1
 
 COPY --chown=ulpf:ulpf . /app
