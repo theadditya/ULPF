@@ -2,7 +2,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Schema: OCSF v1.2](https://img.shields.io/badge/Schema-OCSF%20v1.2%20(Network%204001)-green.svg)](https://schema.ocsf.io)
-[![Tests: Pytest](https://img.shields.io/badge/Tests-20%2F20%20Passed-brightgreen.svg)]()
+[![Tests: Pytest](https://img.shields.io/badge/Tests-23%2F23%20Passed-brightgreen.svg)]()
 [![Air-Gapped: Ready](https://img.shields.io/badge/Air--Gapped-100%25%20Offline-orange.svg)]()
 
 > **Production-Grade Universal Log Pre-processing & Normalization Engine for Perimeter Network Devices**  
@@ -19,6 +19,11 @@
   - [Prerequisites](#prerequisites)
   - [Local Installation](#local-installation)
   - [Docker & Containerized Deployment](#docker--containerized-deployment)
+- [Packaging & Image Creation](#packaging--image-creation)
+  - [Building Docker Container Image](#1-building-docker-container-image)
+  - [Exporting Image for Offline Air-Gapped Transfer](#2-exporting-image-for-offline-air-gapped-transfer)
+  - [Capturing Full-Page Visual Screenshot](#3-capturing-full-page-visual-screenshot)
+- [Vercel Cloud Deployment](#vercel-cloud-deployment)
 - [CLI Tool Reference](#cli-tool-reference)
 - [Web Dashboard & Parser Studio](#web-dashboard--parser-studio)
 - [AI/ML Security Feature Extraction](#aiml-security-feature-extraction)
@@ -62,13 +67,15 @@ Modern enterprises generate billions of daily events across heterogeneous perime
 
 1. **Palo Alto Networks PAN-OS** (`palo_alto_traffic.yaml`): Traffic & Threat CSV/Syslog
 2. **Cisco ASA / Firepower** (`cisco_asa.yaml`): Built, Deny, and Teardown Syslogs (`%ASA-6-302013`, `%ASA-4-106023`)
-3. **Fortinet FortiGate FortiOS** (`fortinet_fortios.yaml`): Traffic forward key-value pairs
-4. **Suricata Network IDS/IPS** (`suricata_eve.yaml`): EVE JSON alert telemetry
-5. **pfSense / OPNsense** (`pfsense_filterlog.yaml`): `filterlog` packet inspection
-6. **Zeek / Bro** (`zeek_conn.yaml`): `conn.log` connection records
-7. **ArcSight Common Event Format (CEF)** (`generic_cef.yaml`): Generic perimeter CEF standard
-8. **IBM QRadar LEEF** (`generic_leef.yaml`): Generic perimeter LEEF 1.0 & 2.0 standard
-9. **Generic Syslog RFC 5424 / 3164** (`generic_syslog.yaml`): Standard Unix/Network relays
+3. **Cisco IOS / IOS-XE** (`cisco_ios.yaml`): Security authentication, login failure, and control plane (`%SEC_LOGIN-4-LOGIN_FAILED`)
+4. **Fortinet FortiGate FortiOS** (`fortinet_fortios.yaml`): Traffic forward key-value pairs
+5. **Suricata Network IDS/IPS** (`suricata_eve.yaml`): EVE JSON alert telemetry
+6. **pfSense / OPNsense** (`pfsense_filterlog.yaml`): `filterlog` packet inspection
+7. **Zeek / Bro** (`zeek_conn.yaml`): `conn.log` connection records
+8. **ArcSight Common Event Format (CEF)** (`generic_cef.yaml`): Generic perimeter CEF standard
+9. **IBM QRadar LEEF** (`generic_leef.yaml`): Generic perimeter LEEF 1.0 & 2.0 standard
+10. **Generic Key-Value Delimited** (`generic_kv.yaml`): Standard whitespace/tab key-value pairs
+11. **Generic Syslog RFC 5424 / 3164** (`generic_syslog.yaml`): Standard Unix/Network relays
 
 ---
 
@@ -146,13 +153,85 @@ Open **`http://localhost:8000`** in your browser to access the Parser Studio!
 
 ### Docker & Containerized Deployment
 
+Launch the entire stack with a single command via [`docker-compose.yml`](docker-compose.yml):
+
 ```bash
 # Build and run container stack in background
 docker compose up -d
 
-# Check health and logs
+# Check health and streaming logs
 docker compose logs -f
 ```
+
+---
+
+## 📦 Packaging & Image Creation
+
+ULPF supports both **software container packaging** for production/air-gapped defense enclaves and **visual full-page capture** for executive reports and architectural reviews:
+
+### 1. Building Docker Container Image
+
+The project provides a hardened, multi-stage, non-root [`Dockerfile`](Dockerfile) (`user: ulpf (10001)`) for defense-grade security:
+
+```bash
+# Build the production Docker image
+docker build -t ulpf:latest .
+
+# Run container with REST API / UI (8000) and Syslog UDP (1514)
+docker run -d \
+  --name ulpf-app \
+  -p 8000:8000 \
+  -p 1514:1514/udp \
+  ulpf:latest
+```
+Access the SOC operations dashboard at `http://localhost:8000`.
+
+### 2. Exporting Image for Offline Air-Gapped Transfer
+
+In classified or isolated defense networks (SCADA, SIPRNet, financial data enclaves) without internet access, export the built container image into a single portable archive:
+
+```bash
+# Export container image to compressed archive (101 MB)
+docker save ulpf:latest | gzip > ulpf-docker-image.tar.gz
+```
+
+**To deploy on any target offline machine (via USB flash drive):**
+```bash
+# Load container image into Docker without internet access
+docker load < ulpf-docker-image.tar.gz
+
+# Run container
+docker run -d -p 8000:8000 -p 1514:1514/udp ulpf:latest
+```
+
+### 3. Capturing Full-Page Visual Screenshot
+
+Capture a high-resolution, full-page visual screenshot of the entire running dashboard (Hero, Parser Studio, and 3-Phase Pipeline):
+
+**Via Headless Chrome (Command Line):**
+```bash
+google-chrome --headless --disable-gpu --window-size=1600,2400 --screenshot=ulpf-dashboard-full.png http://127.0.0.1:8000
+```
+
+**Via Web Browser (Chrome / Edge / Brave):**
+1. Open `http://localhost:8000`.
+2. Press <kbd>F12</kbd> (or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>) to open Developer Tools.
+3. Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> to open the Command Palette.
+4. Type **`Capture full size screenshot`** and press <kbd>Enter</kbd>.
+
+---
+
+## 🌐 Vercel Cloud Deployment
+
+ULPF includes native support for serverless deployment on [Vercel](https://vercel.com):
+
+1. **Push your code to GitHub**: [`https://github.com/theadditya/ULPF.git`](https://github.com/theadditya/ULPF.git).
+2. **Import into Vercel**: Connect your GitHub repository at [vercel.com/new](https://vercel.com/new).
+3. **Zero Configuration**:
+   - Framework Preset: **Other** (Vercel automatically detects Python via [`api/index.py`](api/index.py) and [`requirements.txt`](requirements.txt)).
+   - Asset Bundling: Handled automatically by [`vercel.json`](vercel.json) (bundles all 11 YAML parsers, sample log files, and static UI assets).
+   - Serverless Writable Storage: Automatically utilizes `/tmp/ulpf_data` for ephemeral SQLite and Parquet sink operations.
+   - Public Cloud Intelligence: Automatically starts in `🌐 Public Web Cloud` mode on Vercel.
 
 ---
 

@@ -7,3 +7,6 @@ data/
 *.parquet
 *.jsonl
 *.db
+*.tar
+*.tar.gz
+*.png
