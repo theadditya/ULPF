@@ -11,7 +11,8 @@ const PRESETS = {
     pfsense: '<134>Sep 22 18:04:12 pfsense filterlog: 4,,,1000000103,igb0,match,block,in,4,0x0,,64,0,0,DF,6,tcp,60,45.33.32.156,192.168.1.1,51234,443',
     zeek: '1727028252.123456\tC7xK891mNk8\t192.168.1.120\t49200\t8.8.8.8\t53\tudp\tdns\t0.012\t64\t128\tSF\tT\tF\t0\tDd\t1\t92\t1\t156\t-',
     cef: 'CEF:0|Check Point|VPN-1 & FireWall-1|Check Point|drop|Drop packet|High|src=185.220.101.5 dst=10.0.0.22 spt=44123 dpt=22 proto=6 act=drop in=0 out=0 app=ssh',
-    leef: 'LEEF:2.0|Imperva|SecureSphere|14.0|SECURITY_ALERT|src=203.0.113.19 srcPort=50122 dst=10.0.2.10 dstPort=80 proto=TCP action=block sev=Critical totalBytes=3200'
+    leef: 'LEEF:2.0|Imperva|SecureSphere|14.0|SECURITY_ALERT|src=203.0.113.19 srcPort=50122 dst=10.0.2.10 dstPort=80 proto=TCP action=block sev=Critical totalBytes=3200',
+    cisco_login: '000214: 2026 Sep 23 00:22:14.882 UTC: %SEC_LOGIN-4-LOGIN_FAILED: Login failed [user: root] [Source: 198.51.100.45] [port: 22] [Reason: Authentication Failure]'
 };
 
 // Global State

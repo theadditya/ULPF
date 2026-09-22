@@ -123,6 +123,8 @@ class UniversalNormalizer:
         # Connection Info & Protocol
         proto_raw, pr_key = get_source_val(mapping.get("connection_info.protocol", ["proto", "protocol", "proto_name"]))
         if pr_key: mapped_keys.add(pr_key)
+        if not proto_raw and (event.dst_endpoint.port == 22 or event.src_endpoint.port == 22):
+            proto_raw = "tcp"
         p_name, p_num = normalize_protocol(proto_raw)
         event.connection_info.protocol_name = p_name
         event.connection_info.protocol_num = p_num
@@ -185,6 +187,8 @@ class UniversalNormalizer:
         # Application
         app_val, app_key = get_source_val(mapping.get("app_name", ["app", "application", "service", "proto_name"]))
         if app_key: mapped_keys.add(app_key)
+        if not app_val and (event.dst_endpoint.port == 22 or event.src_endpoint.port == 22):
+            app_val = "ssh"
         event.app_name = str(app_val).strip() if app_val else None
 
         # Threat Signatures

@@ -19,6 +19,7 @@ class LogSourceClassifier:
     SIG_LEEF = re.compile(r"LEEF:\s*[\d\.]+\|")
     SIG_CISCO_ASA = re.compile(r"%ASA-\d+-\d+:")
     SIG_CISCO_FTD = re.compile(r"%FTD-\d+-\d+:")
+    SIG_CISCO_IOS = re.compile(r"%(?:SEC_LOGIN|[A-Z0-9_]+)-\d+-[A-Z0-9_]+:")
     SIG_FORTINET = re.compile(r'(?:devname=|logid=|type=["\']?traffic["\']?|subtype=["\']?forward["\']?)')
     SIG_SURICATA = re.compile(r'"event_type"\s*:\s*"(?:alert|flow|dns|http|tls|netflow)"')
     SIG_PFSENSE = re.compile(r"(?:filterlog(?::|\[\d+\]:)?\s*\d+,\d+,|,\d+,[a-zA-Z0-9_-]+,match,)")
@@ -42,11 +43,13 @@ class LogSourceClassifier:
         if cls.SIG_LEEF.search(raw):
             return "generic_leef", 0.98
 
-        # 3. Cisco ASA / FTD
+        # 3. Cisco ASA / FTD / IOS
         if cls.SIG_CISCO_ASA.search(raw):
             return "cisco_asa", 0.99
         if cls.SIG_CISCO_FTD.search(raw):
             return "cisco_asa", 0.95
+        if cls.SIG_CISCO_IOS.search(raw):
+            return "cisco_ios", 0.95
 
         # 4. Suricata EVE JSON
         if raw.startswith("{") or '"event_type"' in raw:

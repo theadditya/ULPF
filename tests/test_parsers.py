@@ -84,3 +84,18 @@ def test_arcsight_cef(pipeline):
     assert event.dst_endpoint.ip == "10.0.0.22"
     assert event.dst_endpoint.port == 22
     assert event.disposition == EventDisposition.DROPPED
+
+
+def test_cisco_ios_login_failed(pipeline):
+    log = "000214: 2026 Sep 23 00:22:14.882 UTC: %SEC_LOGIN-4-LOGIN_FAILED: Login failed [user: root] [Source: 198.51.100.45] [port: 22] [Reason: Authentication Failure]"
+    event = pipeline.process_event(log)
+
+    assert event.product.vendor_name == "Cisco Systems"
+    assert event.src_endpoint.ip == "198.51.100.45"
+    assert event.dst_endpoint.port == 22
+    assert event.connection_info.protocol_name == "TCP"
+    assert event.app_name == "ssh"
+    assert event.disposition == EventDisposition.BLOCKED
+    assert event.unmapped.get("user") == "root"
+    assert event.unmapped.get("reason") == "Authentication Failure"
+

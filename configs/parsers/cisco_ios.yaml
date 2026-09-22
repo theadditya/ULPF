@@ -1,0 +1,31 @@
+id: "cisco_ios"
+name: "Cisco IOS / IOS-XE Security & Syslog Parser"
+vendor: "Cisco Systems"
+product: "Cisco IOS / IOS-XE Network OS"
+version: "17.x"
+format: "regex"
+strip_syslog_header: false
+
+parser_config:
+  pattern: "(?:(?P<seq_num>\\d+):\\s+)?(?:(?P<timestamp>\\d{4}\\s+[A-Za-z]{3}\\s+\\d+\\s+[\\d:\\.]+(?:\\s+[A-Z]+)?):\\s+)?%(?P<facility>[A-Za-z0-9_]+)-(?P<severity_digit>\\d)-(?P<mnemonic>[A-Za-z0-9_]+):\\s+(?P<message>.*?)(?:\\s+\\[user:\\s*(?P<user>[^\\]]+)\\])?(?:\\s+\\[(?:Source|src):\\s*(?P<src_ip>[^\\]]+)\\])?(?:\\s+\\[port:\\s*(?P<dst_port>\\d+)\\])?(?:\\s+\\[(?:Reason|reason):\\s*(?P<reason>[^\\]]+)\\])?$"
+
+mapping:
+  "src_endpoint.ip": "src_ip"
+  "dst_endpoint.port": "dst_port"
+  "disposition.action": "mnemonic"
+  "severity.level": "severity_digit"
+  "threat.signature_id": "mnemonic"
+
+value_maps:
+  "disposition.action":
+    "login_failed": "Blocked"
+    "login_success": "Allowed"
+    "config_i": "Allowed"
+  "severity.level":
+    "1": "Critical"
+    "2": "Critical"
+    "3": "High"
+    "4": "Medium"
+    "5": "Low"
+    "6": "Informational"
+    "7": "Informational"
