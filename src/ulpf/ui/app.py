@@ -69,10 +69,32 @@ async def serve_dashboard():
     return HTMLResponse("<h2>ULPF Dashboard Active. Static files loading...</h2>")
 
 
+from ulpf.enrichment.mitre_compliance import SecurityIntelligenceEngine
+from ulpf.normalization.exporters import MultiSchemaExporter
+
+DEPLOYMENT_MODE = os.environ.get("ULPF_DEPLOYMENT_MODE", "air_gapped")  # "air_gapped" or "internet"
+
+
+@app.get("/api/v1/system/mode")
+async def get_system_mode():
+    return {
+        "mode": DEPLOYMENT_MODE,
+        "is_air_gapped": DEPLOYMENT_MODE == "air_gapped",
+        "description": "Running 100% self-contained offline without external internet calls" if DEPLOYMENT_MODE == "air_gapped" else "Internet-connected Public SaaS mode"
+    }
+
+
+@app.post("/api/v1/system/mode")
+async def set_system_mode(mode: str = Query(..., pattern="^(air_gapped|internet)$")):
+    global DEPLOYMENT_MODE
+    DEPLOYMENT_MODE = mode
+    return {"status": "updated", "current_mode": DEPLOYMENT_MODE}
+
+
 @app.post("/api/v1/process")
 async def process_single_log(req: LogProcessRequest):
     """
-    Ingests, parses, normalizes, enriches, and extracts ML features for a single raw log.
+    Ingests, parses, normalizes, enriches, extracts ML features, and maps to MITRE & Compliance.
     """
     if not req.raw_log.strip():
         raise HTTPException(status_code=400, detail="Empty raw_log received.")
@@ -81,12 +103,51 @@ async def process_single_log(req: LogProcessRequest):
     features = MLFeatureExtractor.extract_features(event)
     vector = MLFeatureExtractor.to_vector(event)
     
+    # Wazuh-inspired Intelligence & Compliance Engine
+    mitre, compliance, risk = SecurityIntelligenceEngine.evaluate(event)
+    wazuh_format = MultiSchemaExporter.to_wazuh_format(event, risk.score)
+    ecs_format = MultiSchemaExporter.to_ecs_format(event)
+
+    # 3-Phase Wazuh Logtest-inspired Transformation Trace
+    phases = {
+        "phase_1": {
+            "title": "Phase 1: Ingestion & Integrity Hash",
+            "description": "Verbatim raw log captured and SHA-256 fingerprint computed for legal non-repudiation.",
+            "sha256": event.lineage.raw_hash,
+            "raw_length": len(event.raw_event),
+            "ingestion_timestamp": event.lineage.ingestion_timestamp
+        },
+        "phase_2": {
+            "title": f"Phase 2: YAML Extraction ({event.lineage.parser_id})",
+            "description": f"Log deconstructed into key-value pairs using declarative parser rules for {event.product.vendor_name}.",
+            "parser_id": event.lineage.parser_id,
+            "vendor": event.product.vendor_name,
+            "unmapped_retained": len(event.unmapped)
+        },
+        "phase_3": {
+            "title": "Phase 3: OCSF v1.2 Normalization & Intelligence",
+            "description": "Attributes mapped to canonical OCSF Network Activity (Class 4001), MITRE ATT&CK, and 26-D ML vectors.",
+            "action": event.disposition.value,
+            "direction": event.connection_info.direction.value,
+            "mitre_tactic": mitre.tactic_name,
+            "risk_score": risk.score,
+            "ml_features_count": len(vector)
+        }
+    }
+    
     return {
         "event": event.model_dump(),
         "integrity_verified": event.verify_integrity(),
         "features": features,
         "ml_vector": vector,
         "feature_names": MLFeatureExtractor.get_feature_names(),
+        "mitre": mitre.model_dump(),
+        "compliance": compliance.model_dump(),
+        "risk": risk.model_dump(),
+        "phases": phases,
+        "wazuh_format": wazuh_format,
+        "ecs_format": ecs_format,
+        "deployment_mode": DEPLOYMENT_MODE,
     }
 
 

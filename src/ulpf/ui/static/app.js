@@ -13,9 +13,10 @@ const PRESETS = {
 
 let cachedStreamRecords = [];
 let currentEventData = null;
+let currentSchemaView = 'ocsf'; // 'ocsf' | 'wazuh' | 'ecs'
 
 // ==========================================
-// Theme Management (Light & Dark)
+// Theme Management
 // ==========================================
 function initTheme() {
     const savedTheme = localStorage.getItem('ulpf-theme');
@@ -35,14 +36,37 @@ function toggleTheme() {
 }
 
 // ==========================================
-// Preset & Input Handling
+// Dual Deployment Mode: Air-Gapped vs Public Web
+// ==========================================
+async function setDeploymentMode(mode) {
+    const airgapBtn = document.getElementById('btn-mode-airgap');
+    const webBtn = document.getElementById('btn-mode-web');
+    const desc = document.getElementById('subbar-mode-desc');
+
+    if (mode === 'air_gapped') {
+        airgapBtn.classList.add('active');
+        webBtn.classList.remove('active');
+        desc.innerText = '100% Offline Local Engine (No external API calls, defense enclave mode)';
+        showToast('Switched to Air-Gapped Isolated Mode');
+    } else {
+        webBtn.classList.add('active');
+        airgapBtn.classList.remove('active');
+        desc.innerText = 'Public Web Cloud Mode (Ready for general internet & SaaS usage)';
+        showToast('Switched to Public Web Cloud Mode');
+    }
+
+    try {
+        await fetch(`/api/v1/system/mode?mode=${mode}`, { method: 'POST' });
+    } catch (e) {}
+}
+
+// ==========================================
+// Presets & Input
 // ==========================================
 function selectPreset(presetKey) {
-    // Highlight chip
-    document.querySelectorAll('.preset-chips .chip').forEach(btn => btn.classList.remove('active'));
-    const clickedBtn = event && event.target;
-    if (clickedBtn && clickedBtn.classList.contains('chip')) {
-        clickedBtn.classList.add('active');
+    document.querySelectorAll('.preset-pill-list .preset-btn').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target && event.target.classList.contains('preset-btn')) {
+        event.target.classList.add('active');
     }
 
     const raw = PRESETS[presetKey];
@@ -58,25 +82,44 @@ function clearInput() {
 }
 
 // ==========================================
-// Tab Switching
+// Tabs & Multi-Schema Views
 // ==========================================
 function switchTab(tabId) {
-    document.querySelectorAll('.tab-item').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.wazuh-tab').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-    const tabButtons = document.querySelectorAll('.tab-item');
+    const tabButtons = document.querySelectorAll('.wazuh-tab');
     if (tabId === 'tab-summary') tabButtons[0].classList.add('active');
-    if (tabId === 'tab-ocsf') tabButtons[1].classList.add('active');
-    if (tabId === 'tab-lineage') tabButtons[2].classList.add('active');
-    if (tabId === 'tab-ml') tabButtons[3].classList.add('active');
-    if (tabId === 'tab-unmapped') tabButtons[4].classList.add('active');
+    if (tabId === 'tab-logtest') tabButtons[1].classList.add('active');
+    if (tabId === 'tab-mitre') tabButtons[2].classList.add('active');
+    if (tabId === 'tab-schema') tabButtons[3].classList.add('active');
+    if (tabId === 'tab-ml') tabButtons[4].classList.add('active');
+    if (tabId === 'tab-unmapped') tabButtons[5].classList.add('active');
 
     const pane = document.getElementById(tabId);
     if (pane) pane.classList.add('active');
 }
 
+function setSchemaView(schemaType) {
+    currentSchemaView = schemaType;
+    document.querySelectorAll('.schema-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById(`btn-schema-${schemaType}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    if (!currentEventData) return;
+
+    const codeEl = document.getElementById('code-schema');
+    if (schemaType === 'ocsf') {
+        codeEl.innerText = JSON.stringify(currentEventData.event, null, 2);
+    } else if (schemaType === 'wazuh') {
+        codeEl.innerText = JSON.stringify(currentEventData.wazuh_format, null, 2);
+    } else if (schemaType === 'ecs') {
+        codeEl.innerText = JSON.stringify(currentEventData.ecs_format, null, 2);
+    }
+}
+
 // ==========================================
-// API Interaction & Normalization
+// Core Pipeline Execution
 // ==========================================
 async function processCurrentLog() {
     const input = document.getElementById('raw-log-input').value.trim();
@@ -84,7 +127,7 @@ async function processCurrentLog() {
 
     const btn = document.getElementById('btn-process');
     btn.disabled = true;
-    btn.innerHTML = `<span class="detect-pulse"></span> Processing...`;
+    btn.innerHTML = `<span class="pulse-indicator"></span> Analyzing...`;
 
     try {
         const response = await fetch('/api/v1/process', {
@@ -111,24 +154,28 @@ async function processCurrentLog() {
         btn.disabled = false;
         btn.innerHTML = `
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            Normalize &amp; Process Log
+            Normalize &amp; Analyze Event
         `;
     }
 }
 
 // ==========================================
-// Render Visual & Standardized Results
+// Render Wazuh-Grade Visual Intelligence
 // ==========================================
 function renderResults(data) {
     const event = data.event;
+    const mitre = data.mitre;
+    const comp = data.compliance;
+    const risk = data.risk;
+    const phases = data.phases;
 
     // 1. Auto-Detection Pill
     const pill = document.getElementById('detection-pill');
     const parserName = document.getElementById('detected-parser-name');
     pill.style.display = 'inline-flex';
-    parserName.innerText = `Detected: ${event.product.vendor_name} (${event.lineage.parser_id})`;
+    parserName.innerText = `Auto-Detected: ${event.product.vendor_name} (${event.lineage.parser_id})`;
 
-    // 2. Tab 1: Human-Friendly Visual Summary
+    // 2. Tab 1: Visual Summary Card
     document.getElementById('summary-empty').style.display = 'none';
     document.getElementById('summary-content').style.display = 'block';
 
@@ -136,16 +183,17 @@ function renderResults(data) {
     const isAllowed = action === 'Allowed';
     const verdictAction = document.getElementById('verdict-action');
     verdictAction.innerText = action;
-    verdictAction.className = `verdict-tag ${isAllowed ? 'act-allowed' : 'act-blocked'}`;
+    verdictAction.className = `verdict-pill ${isAllowed ? 'act-allowed' : 'act-blocked'}`;
 
-    // Direction & Scope
     const dir = event.connection_info.direction || 'Unknown';
     document.getElementById('verdict-direction').innerText = `Flow Direction: ${dir}`;
 
-    const sev = event.severity || 'Informational';
-    document.getElementById('verdict-severity').innerText = `${sev} Severity`;
+    // Risk Meter Bar & Score
+    const riskBar = document.getElementById('risk-bar-fill');
+    riskBar.style.width = `${risk.score}%`;
+    document.getElementById('risk-score-text').innerText = `${risk.score} / 100 (${risk.level})`;
 
-    // Endpoints
+    // Endpoints & Scope
     document.getElementById('summary-src-ip').innerText = event.src_endpoint.ip || '0.0.0.0';
     document.getElementById('summary-src-port').innerText = event.src_endpoint.port || '—';
     const srcScope = event.src_endpoint.is_internal ? 'Internal LAN' : (event.src_endpoint.country || 'Public');
@@ -156,56 +204,54 @@ function renderResults(data) {
     const dstScope = event.dst_endpoint.is_internal ? 'Internal LAN' : (event.dst_endpoint.country || 'Public');
     const dstBadge = document.getElementById('summary-dst-scope');
     dstBadge.innerText = dstScope;
-    dstBadge.className = `flow-badge ${event.dst_endpoint.is_internal ? '' : 'flow-badge-public'}`;
+    dstBadge.className = `scope-pill ${event.dst_endpoint.is_internal ? '' : 'scope-public'}`;
 
     document.getElementById('summary-proto').innerText = (event.connection_info.protocol_name || 'IP').toUpperCase();
-    
-    // Bytes formatting
+
     const totalBytes = event.traffic.total_bytes || (event.traffic.bytes_in + event.traffic.bytes_out) || 0;
     const bytesFormatted = totalBytes > 1024 ? `${(totalBytes / 1024).toFixed(1)} KB` : `${totalBytes} B`;
     document.getElementById('summary-bytes').innerText = bytesFormatted;
 
     document.getElementById('summary-vendor').innerText = `${event.product.vendor_name} (${event.product.product_name})`;
     document.getElementById('summary-app').innerText = event.app_name || 'Standard Network Traffic';
-    
-    const durationMs = event.traffic.duration_ms || 0;
-    document.getElementById('summary-duration').innerText = `${(durationMs / 1000).toFixed(2)} seconds (${durationMs} ms)`;
+    document.getElementById('summary-hash-short').innerText = (event.lineage.raw_hash || '').substring(0, 16) + '...';
 
     const threatEl = document.getElementById('summary-threat');
     if (event.threat && event.threat.signature_name) {
         threatEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">🚨 ${event.threat.signature_name}</span>`;
     } else {
-        threatEl.innerHTML = `<span style="color:var(--success); font-weight:600;">Clean (No Threats Detected)</span>`;
+        threatEl.innerHTML = `<span style="color:var(--success); font-weight:600;">Clean (Zero Active IoCs)</span>`;
     }
 
-    // 3. Tab 2: OCSF JSON
-    document.getElementById('code-ocsf').innerText = JSON.stringify(event, null, 2);
+    // 3. Tab 2: 3-Phase Transformation Stepper (Wazuh Logtest)
+    if (phases) {
+        document.getElementById('phase-1-hash').innerText = `SHA-256 Digest: ${phases.phase_1.sha256} (${phases.phase_1.raw_length} bytes losslessly preserved)`;
+        document.getElementById('phase-2-details').innerText = `Parser: ${phases.phase_2.parser_id} | Vendor: ${phases.phase_2.vendor} | Retained Unmapped Keys: ${phases.phase_2.unmapped_retained}`;
+        document.getElementById('phase-3-details').innerText = `Disposition: ${phases.phase_3.action} | Direction: ${phases.phase_3.direction} | MITRE Tactic: ${phases.phase_3.mitre_tactic} | ML Features: ${phases.phase_3.ml_features_count}D`;
+    }
 
-    // 4. Tab 3: Forensic Lineage & SHA-256
-    const verified = data.integrity_verified;
-    document.getElementById('lineage-summary').innerHTML = `
-        <div class="lineage-card">
-            <div class="lineage-title">Cryptographic SHA-256 Fingerprint (Forensic Hash)</div>
-            <div class="lineage-hash">${event.lineage.raw_hash}</div>
-            <div class="verified-seal" style="background:${verified ? 'var(--success-bg)' : 'var(--danger-bg)'}; color:${verified ? 'var(--success)' : 'var(--danger)'};">
-                ${verified ? '✔ VERIFIED: Raw payload perfectly matches cryptographic checksum (Tamper-Evident)' : '✖ TAMPER WARNING'}
-            </div>
-        </div>
-        <div class="lineage-card">
-            <div class="lineage-title">Lineage Metadata &amp; Provenance</div>
-            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem;">
-                <strong>Event UUID:</strong> <code>${event.lineage.event_id}</code>
-            </p>
-            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.25rem;">
-                <strong>Schema Spec:</strong> <code>${event.lineage.schema_version}</code> &bull; <strong>Parser:</strong> <code>${event.lineage.parser_id} (v${event.lineage.parser_version})</code>
-            </p>
-            <p style="font-size:0.8rem; color:var(--text-secondary);">
-                <strong>Processing Latency:</strong> <code>${event.lineage.processing_latency_ms} ms</code>
-            </p>
-        </div>
-    `;
+    // 4. Tab 3: MITRE ATT&CK & Compliance
+    if (mitre) {
+        document.getElementById('mitre-tactic').innerText = `${mitre.tactic_id}: ${mitre.tactic_name}`;
+        document.getElementById('mitre-technique').innerText = `${mitre.technique_id}: ${mitre.technique_name}`;
+        document.getElementById('mitre-link').href = mitre.url;
+    }
 
-    // 5. Tab 4: AI/ML Feature Vector
+    if (comp) {
+        const compContainer = document.getElementById('compliance-badges');
+        compContainer.innerHTML = `
+            <div class="comp-badge"><strong>PCI-DSS v4.0:</strong> ${comp.pci_dss[0]}</div>
+            <div class="comp-badge"><strong>NIST SP 800-53:</strong> ${comp.nist_800_53[0]}</div>
+            <div class="comp-badge"><strong>ISO 27001:</strong> ${comp.iso_27001[0]}</div>
+            <div class="comp-badge"><strong>HIPAA Security:</strong> ${comp.hipaa[0]}</div>
+            <div class="comp-badge"><strong>GDPR Article 32:</strong> ${comp.gdpr[0]}</div>
+        `;
+    }
+
+    // 5. Tab 4: Multi-Schema Export
+    setSchemaView(currentSchemaView);
+
+    // 6. Tab 5: AI/ML Feature Vector
     const feats = data.features;
     let mlCards = '<div class="ml-grid-layout">';
     for (const [k, v] of Object.entries(feats)) {
@@ -220,25 +266,25 @@ function renderResults(data) {
     mlCards += `
         <div style="margin-top: 1rem;">
             <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">
-                Numerical Feature Vector [${data.ml_vector.length} dimensions ready for XGBoost / Isolation Forests]:
+                Mathematical Vector Array [${data.ml_vector.length} dimensions]:
             </span>
-            <pre class="code-box"><code>${JSON.stringify(data.ml_vector)}</code></pre>
+            <pre class="code-terminal"><code>${JSON.stringify(data.ml_vector)}</code></pre>
         </div>
     `;
     document.getElementById('ml-container').innerHTML = mlCards;
 
-    // 6. Tab 5: Unmapped Attributes (0% Data Loss)
+    // 7. Tab 6: Unmapped Attributes
     const unmappedCode = document.getElementById('code-unmapped');
     const unmappedKeys = Object.keys(event.unmapped || {});
     if (unmappedKeys.length === 0) {
-        unmappedCode.innerText = '// All extracted vendor fields mapped 100% cleanly into the canonical OCSF v1.2 standard schema!';
+        unmappedCode.innerText = '// All extracted vendor fields were mapped 100% cleanly into the canonical OCSF v1.2 standard schema!';
     } else {
         unmappedCode.innerText = JSON.stringify(event.unmapped, null, 2);
     }
 }
 
 // ==========================================
-// Copy to Clipboard with Toast
+// Copy to Clipboard
 // ==========================================
 function copyActiveOutput() {
     if (!currentEventData) {
@@ -246,16 +292,16 @@ function copyActiveOutput() {
         return;
     }
 
-    const activeTab = document.querySelector('.tab-pane.active');
+    const activeTab = document.querySelector('.tab-content.active');
     let textToCopy = '';
-    if (activeTab.id === 'tab-ocsf') {
-        textToCopy = JSON.stringify(currentEventData.event, null, 2);
+
+    if (activeTab.id === 'tab-schema') {
+        const codeEl = document.getElementById('code-schema');
+        textToCopy = codeEl.innerText;
     } else if (activeTab.id === 'tab-ml') {
         textToCopy = JSON.stringify(currentEventData.ml_vector);
     } else if (activeTab.id === 'tab-unmapped') {
         textToCopy = JSON.stringify(currentEventData.event.unmapped, null, 2);
-    } else if (activeTab.id === 'tab-lineage') {
-        textToCopy = currentEventData.event.lineage.raw_hash;
     } else {
         textToCopy = JSON.stringify(currentEventData.event, null, 2);
     }
@@ -274,22 +320,19 @@ function showToast(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 2200);
 }
 
-// ==========================================
-// Educational Modal Toggle
-// ==========================================
 function toggleHelpModal() {
     const modal = document.getElementById('help-modal');
     modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
 }
 
 // ==========================================
-// Data Lake & Live Feed Management
+// Data Feed & Stream
 // ==========================================
 async function loadSampleDataset() {
     try {
         const res = await fetch('/api/v1/load-samples', { method: 'POST' });
         const data = await res.json();
-        showToast(`Loaded ${data.ingested_events} multi-vendor fleet events!`);
+        showToast(`Loaded ${data.ingested_events} multi-vendor perimeter events!`);
         fetchTelemetry();
         fetchRecentEvents();
     } catch (err) {
@@ -318,9 +361,7 @@ async function fetchRecentEvents() {
         const data = await res.json();
         cachedStreamRecords = data.records || [];
         renderStreamTable(cachedStreamRecords);
-    } catch (e) {
-        console.error('Error fetching stream', e);
-    }
+    } catch (e) {}
 }
 
 function filterStreamTable() {
@@ -348,16 +389,16 @@ function renderStreamTable(records) {
 
     tbody.innerHTML = records.map(r => {
         const isAllowed = r.action === 'Allowed';
-        const badgeClass = isAllowed ? 'status-allowed' : 'status-blocked';
+        const badgeClass = isAllowed ? 'act-allowed' : 'act-blocked';
         const shortHash = (r.raw_hash || '').substring(0, 12) + '...';
         return `
             <tr>
-                <td><span class="badge-status ${badgeClass}">${r.action || 'Unknown'}</span></td>
+                <td><span class="verdict-pill ${badgeClass}">${r.action || 'Unknown'}</span></td>
                 <td><span style="color:var(--text-secondary);">${r.severity || 'Informational'}</span></td>
                 <td><strong>${r.vendor || 'Generic'}</strong> <span style="color:var(--text-muted);">${r.product || ''}</span></td>
                 <td>${r.src_ip || '—'}:${r.src_port || '—'}</td>
                 <td>${r.dst_ip || '—'}:${r.dst_port || '—'}</td>
-                <td><span style="color:var(--primary); font-weight:700;">${r.protocol || '—'}</span></td>
+                <td><span style="color:var(--cyan); font-weight:700;">${r.protocol || '—'}</span></td>
                 <td title="${r.raw_hash}"><span style="color:var(--text-muted);">${shortHash}</span></td>
             </tr>
         `;

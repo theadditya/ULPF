@@ -3,40 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULPF — Universal Log Pre-processing &amp; Normalization Studio</title>
+    <title>ULPF — Universal Log Pre-processing &amp; Normalization Platform</title>
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <!-- Top Modern Navigation -->
+    <!-- Top Modern Navigation inspired by Wazuh & Cloudflare -->
     <header class="navbar">
         <div class="nav-brand">
             <div class="brand-logo">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
             </div>
             <div>
                 <div class="brand-title-wrap">
-                    <h1 class="brand-title">ULPF Studio</h1>
-                    <span class="version-tag">v1.2 OCSF</span>
+                    <h1 class="brand-title">ULPF Security Hub</h1>
+                    <span class="wazuh-pill">OCSF v1.2 &bull; Wazuh XDR Ready</span>
                 </div>
-                <p class="brand-tagline">Universal Log Pre-processing &amp; Forensic Normalization Framework</p>
+                <p class="brand-tagline">Universal Pre-processing, Threat Enrichment &amp; Data Lake Normalization</p>
             </div>
         </div>
 
         <div class="nav-controls">
-            <div class="status-indicator" title="Operating with zero external internet queries">
-                <span class="status-dot"></span>
-                <span>Air-Gapped Mode</span>
+            <!-- Dual Deployment Mode Selector (Air-Gapped vs Public Web) -->
+            <div class="mode-selector-wrap" title="Toggle between Air-Gapped and Public Internet mode">
+                <button class="mode-pill active" id="btn-mode-airgap" onclick="setDeploymentMode('air_gapped')">
+                    <span class="mode-dot"></span>
+                    <span>Air-Gapped Enclave</span>
+                </button>
+                <button class="mode-pill" id="btn-mode-web" onclick="setDeploymentMode('internet')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    <span>Public Web Cloud</span>
+                </button>
             </div>
 
             <!-- Theme Toggle Button -->
-            <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Switch Light/Dark Theme" aria-label="Toggle theme">
-                <!-- Sun Icon -->
-                <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Switch Light/Dark Theme">
+                <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="5"></circle>
                     <line x1="12" y1="1" x2="12" y2="3"></line>
                     <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -47,364 +54,436 @@
                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                 </svg>
-                <!-- Moon Icon -->
-                <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </button>
 
+            <!-- Guide Modal Button -->
             <button class="btn btn-secondary btn-sm" onclick="toggleHelpModal()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                How It Works
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Architecture Guide
             </button>
         </div>
     </header>
 
-    <!-- User-Friendly 3-Step Guided Workflow Banner (Great for non-tech users) -->
-    <section class="stepper-banner">
-        <div class="step-card">
-            <div class="step-num">1</div>
-            <div class="step-content">
-                <strong>Pick or Paste Any Log</strong>
-                <span>Firewalls, IDSs, or Routers</span>
+    <!-- Sub-Navbar: Wazuh-Inspired Operational Banner -->
+    <section class="wazuh-subbar">
+        <div class="subbar-badges">
+            <span class="subbar-item">
+                <strong class="text-cyan">Dual Architecture:</strong>
+                <span id="subbar-mode-desc">100% Offline Local Engine (No external API calls)</span>
+            </span>
+            <span class="subbar-divider">|</span>
+            <span class="subbar-item">
+                <strong>Taxonomy:</strong> OCSF 4001 Network Activity &bull; Elastic ECS &bull; Wazuh 4.x
+            </span>
+        </div>
+        <div class="subbar-actions">
+            <button class="btn-text-sm" onclick="loadSampleDataset()">⚡ Ingest Perimeter Fleet Samples</button>
+        </div>
+    </section>
+
+    <!-- Telemetry Cards Bar -->
+    <section class="telemetry-grid">
+        <div class="stat-box">
+            <span class="stat-title">Total Ingested Events</span>
+            <div class="stat-metric-row">
+                <h3 class="stat-number" id="stat-total">0</h3>
+                <span class="stat-trend">EPS Ready</span>
             </div>
         </div>
-        <div class="step-arrow">➔</div>
-        <div class="step-card">
-            <div class="step-num">2</div>
-            <div class="step-content">
-                <strong>Instant Auto-Detection</strong>
-                <span>Identifies vendor &amp; normalizes</span>
+
+        <div class="stat-box">
+            <span class="stat-title">Sub-Millisecond Latency</span>
+            <div class="stat-metric-row">
+                <h3 class="stat-number" id="stat-latency">0.12 ms</h3>
+                <span class="stat-badge-green">Median p50</span>
             </div>
         </div>
-        <div class="step-arrow">➔</div>
-        <div class="step-card">
-            <div class="step-num">3</div>
-            <div class="step-content">
-                <strong>Standardized &amp; AI-Ready</strong>
-                <span>100% Lossless OCSF v1.2 output</span>
+
+        <div class="stat-box">
+            <span class="stat-title">Active Perimeter Parsers</span>
+            <div class="stat-metric-row">
+                <h3 class="stat-number" id="stat-parsers">9 Loaded</h3>
+                <span class="stat-trend">Declarative YAML</span>
+            </div>
+        </div>
+
+        <div class="stat-box">
+            <span class="stat-title">Forensic Lossless Rate</span>
+            <div class="stat-metric-row">
+                <h3 class="stat-number text-green" id="stat-integrity">100.0%</h3>
+                <span class="stat-badge-green">SHA-256 Proven</span>
             </div>
         </div>
     </section>
 
-    <!-- KPI Telemetry Cards -->
-    <section class="metrics-grid">
-        <div class="kpi-card">
-            <div class="kpi-icon icon-blue">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            </div>
-            <div>
-                <span class="kpi-label">Events Processed</span>
-                <h3 class="kpi-value" id="stat-total">0</h3>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon icon-emerald">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            </div>
-            <div>
-                <span class="kpi-label">Processing Latency</span>
-                <h3 class="kpi-value" id="stat-latency">0.12 ms</h3>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon icon-purple">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-            </div>
-            <div>
-                <span class="kpi-label">Device Parsers</span>
-                <h3 class="kpi-value" id="stat-parsers">9 Available</h3>
-            </div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-icon icon-green">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            </div>
-            <div>
-                <span class="kpi-label">Forensic Lossless Rate</span>
-                <h3 class="kpi-value green-text" id="stat-integrity">100.0%</h3>
-            </div>
-        </div>
-
-        <div class="kpi-action-card">
-            <button class="btn btn-primary btn-block" onclick="loadSampleDataset()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                Load Sample Fleet Logs
-            </button>
-        </div>
-    </section>
-
-    <!-- Main Studio Split Layout -->
-    <main class="studio-layout">
-        <!-- Left Panel: Input & Quick Presets -->
-        <section class="card studio-panel">
-            <div class="card-header">
-                <div class="header-left">
-                    <span class="step-badge">STEP 1</span>
-                    <h2 class="card-title">Select or Paste Raw Log</h2>
+    <!-- Main Workspace (Studio & Inspector) -->
+    <main class="studio-container">
+        <!-- Left Column: Input Studio -->
+        <section class="card studio-card">
+            <div class="card-head">
+                <div class="head-title-wrap">
+                    <span class="badge-num">1</span>
+                    <h2 class="head-title">Perimeter Device Log Ingestion</h2>
                 </div>
-                <button class="btn-text" onclick="clearInput()">Clear</button>
+                <button class="btn-text-sm" onclick="clearInput()">Clear</button>
             </div>
 
-            <!-- Friendly Presets with Vendor Tags -->
-            <div class="presets-section">
-                <span class="presets-title">Quick Presets (Click any to test):</span>
-                <div class="preset-chips">
-                    <button class="chip active" onclick="selectPreset('palo_alto')">Palo Alto CSV</button>
-                    <button class="chip" onclick="selectPreset('cisco_built')">Cisco Built</button>
-                    <button class="chip" onclick="selectPreset('cisco_deny')">Cisco Deny</button>
-                    <button class="chip" onclick="selectPreset('fortinet')">FortiGate KV</button>
-                    <button class="chip" onclick="selectPreset('suricata')">Suricata EVE</button>
-                    <button class="chip" onclick="selectPreset('pfsense')">pfSense Filter</button>
-                    <button class="chip" onclick="selectPreset('zeek')">Zeek Conn</button>
-                    <button class="chip" onclick="selectPreset('cef')">ArcSight CEF</button>
-                    <button class="chip" onclick="selectPreset('leef')">IBM LEEF</button>
+            <!-- Preset Selector Pills -->
+            <div class="presets-toolbar">
+                <span class="presets-heading">Quick Device Presets:</span>
+                <div class="preset-pill-list">
+                    <button class="preset-btn active" onclick="selectPreset('palo_alto')">Palo Alto PAN-OS</button>
+                    <button class="preset-btn" onclick="selectPreset('cisco_built')">Cisco ASA (Built)</button>
+                    <button class="preset-btn" onclick="selectPreset('cisco_deny')">Cisco ASA (Deny)</button>
+                    <button class="preset-btn" onclick="selectPreset('fortinet')">Fortinet FortiOS</button>
+                    <button class="preset-btn" onclick="selectPreset('suricata')">Suricata EVE IDS</button>
+                    <button class="preset-btn" onclick="selectPreset('pfsense')">pfSense Packet Filter</button>
+                    <button class="preset-btn" onclick="selectPreset('zeek')">Zeek Conn Log</button>
+                    <button class="preset-btn" onclick="selectPreset('cef')">ArcSight CEF</button>
+                    <button class="preset-btn" onclick="selectPreset('leef')">IBM LEEF</button>
                 </div>
             </div>
 
-            <!-- Input Area -->
-            <div class="editor-wrap">
-                <textarea id="raw-log-input" rows="5" placeholder="Paste any raw network device log here (e.g. Syslog, JSON, CEF, CSV, Key-Value)..." spellcheck="false"></textarea>
+            <div class="input-editor-area">
+                <textarea id="raw-log-input" rows="5" placeholder="Paste any raw network device log here (Syslog RFC 3164/5424, Key-Value, CSV, JSON, CEF, LEEF)..." spellcheck="false"></textarea>
             </div>
 
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <button class="btn btn-primary btn-lg" id="btn-process" onclick="processCurrentLog()">
+            <div class="action-dock">
+                <button class="btn btn-primary" id="btn-process" onclick="processCurrentLog()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    Normalize &amp; Process Log
+                    Normalize &amp; Analyze Event
                 </button>
                 <div id="detection-pill" class="detection-pill" style="display: none;">
-                    <span class="detect-pulse"></span>
-                    <span class="detect-text" id="detected-parser-name">Detecting...</span>
+                    <span class="pulse-indicator"></span>
+                    <span id="detected-parser-name">Detecting...</span>
                 </div>
             </div>
         </section>
 
-        <!-- Right Panel: Standardized Output & Visual Insights -->
-        <section class="card studio-panel">
-            <div class="card-header">
-                <div class="header-left">
-                    <span class="step-badge step-badge-green">STEP 2</span>
-                    <h2 class="card-title">Normalized Output &amp; Intelligence</h2>
+        <!-- Right Column: Security Intelligence & Multi-Schema Output -->
+        <section class="card studio-card">
+            <div class="card-head">
+                <div class="head-title-wrap">
+                    <span class="badge-num badge-num-green">2</span>
+                    <h2 class="head-title">Security Intelligence &amp; Multi-Schema Output</h2>
                 </div>
-                <button class="btn-text" onclick="copyActiveOutput()" title="Copy current output">
+                <button class="btn-text-sm" onclick="copyActiveOutput()" title="Copy active tab content">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    Copy
+                    Copy Output
                 </button>
             </div>
 
-            <!-- Output Tabs Navigation -->
-            <div class="tabs-nav">
-                <button class="tab-item active" onclick="switchTab('tab-summary')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <!-- Tabs Navigation -->
+            <div class="wazuh-tabs">
+                <button class="wazuh-tab active" onclick="switchTab('tab-summary')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                     Visual Summary
                 </button>
-                <button class="tab-item" onclick="switchTab('tab-ocsf')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                    OCSF v1.2 JSON
+                <button class="wazuh-tab" onclick="switchTab('tab-logtest')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    3-Phase Transformation
                 </button>
-                <button class="tab-item" onclick="switchTab('tab-lineage')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Forensic Proof &amp; SHA-256
+                <button class="wazuh-tab" onclick="switchTab('tab-mitre')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                    MITRE ATT&amp;CK &amp; Compliance
                 </button>
-                <button class="tab-item" onclick="switchTab('tab-ml')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    AI/ML Vector (26-D)
+                <button class="wazuh-tab" onclick="switchTab('tab-schema')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    Multi-Schema Export
                 </button>
-                <button class="tab-item" onclick="switchTab('tab-unmapped')">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                <button class="wazuh-tab" onclick="switchTab('tab-ml')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    AI/ML 26-D Vector
+                </button>
+                <button class="wazuh-tab" onclick="switchTab('tab-unmapped')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
                     0% Loss Retention
                 </button>
             </div>
 
-            <!-- Tab 1: Human-Friendly Visual Summary -->
-            <div id="tab-summary" class="tab-pane active">
+            <!-- Tab 1: Visual Summary Card (Human Friendly) -->
+            <div id="tab-summary" class="tab-content active">
                 <div id="summary-empty" class="empty-state">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    <p>Click <strong>"Normalize &amp; Process Log"</strong> to inspect the event in human-readable cards.</p>
+                    <p>Click <strong>"Normalize &amp; Analyze Event"</strong> to view plain-English traffic intelligence.</p>
                 </div>
 
                 <div id="summary-content" style="display: none;">
-                    <!-- Verdict Banner -->
-                    <div class="verdict-banner" id="verdict-banner">
+                    <!-- Threat Risk Gauge & Verdict Bar -->
+                    <div class="verdict-banner">
                         <div class="verdict-left">
-                            <span class="verdict-tag" id="verdict-action">Allowed</span>
-                            <span class="verdict-sub" id="verdict-direction">Outbound (LAN ➔ Public Internet)</span>
+                            <span class="verdict-pill" id="verdict-action">Allowed</span>
+                            <span class="verdict-flow-text" id="verdict-direction">Outbound (LAN ➔ Public Internet)</span>
                         </div>
                         <div class="verdict-right">
-                            <span class="sev-pill" id="verdict-severity">Low Severity</span>
+                            <div class="risk-meter-wrap">
+                                <span class="risk-label">Threat Risk Index:</span>
+                                <div class="risk-bar-outer">
+                                    <div class="risk-bar-inner" id="risk-bar-fill" style="width: 25%;"></div>
+                                </div>
+                                <span class="risk-score-text" id="risk-score-text">25 / 100</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Flow Diagram (Source -> Destination) -->
-                    <div class="flow-container">
-                        <div class="flow-card">
-                            <span class="flow-role">ORIGIN ENDPOINT</span>
-                            <h4 class="flow-ip" id="summary-src-ip">192.168.1.50</h4>
-                            <div class="flow-meta">
+                    <!-- Flow Diagram Card -->
+                    <div class="flow-box">
+                        <div class="endpoint-card">
+                            <span class="endpoint-label">SOURCE ENDPOINT</span>
+                            <h4 class="endpoint-ip" id="summary-src-ip">192.168.1.50</h4>
+                            <div class="endpoint-meta">
                                 <span>Port: <strong id="summary-src-port">54123</strong></span>
-                                <span class="flow-badge" id="summary-src-scope">Internal LAN</span>
+                                <span class="scope-pill" id="summary-src-scope">Internal LAN</span>
                             </div>
                         </div>
 
-                        <div class="flow-arrow-wrap">
-                            <span class="flow-proto" id="summary-proto">TCP</span>
-                            <div class="flow-arrow-line"></div>
-                            <span class="flow-bytes" id="summary-bytes">1.4 KB</span>
+                        <div class="flow-connector">
+                            <span class="flow-proto-tag" id="summary-proto">TCP</span>
+                            <div class="connector-line"></div>
+                            <span class="flow-size" id="summary-bytes">1.4 KB</span>
                         </div>
 
-                        <div class="flow-card">
-                            <span class="flow-role">TARGET ENDPOINT</span>
-                            <h4 class="flow-ip" id="summary-dst-ip">104.16.24.1</h4>
-                            <div class="flow-meta">
+                        <div class="endpoint-card">
+                            <span class="endpoint-label">TARGET ENDPOINT</span>
+                            <h4 class="endpoint-ip" id="summary-dst-ip">104.16.24.1</h4>
+                            <div class="endpoint-meta">
                                 <span>Port: <strong id="summary-dst-port">443</strong></span>
-                                <span class="flow-badge flow-badge-public" id="summary-dst-scope">Public Internet</span>
+                                <span class="scope-pill scope-public" id="summary-dst-scope">Public Internet</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Detailed Metrics Grid -->
-                    <div class="detail-grid">
-                        <div class="detail-cell">
-                            <span class="detail-k">Device Vendor</span>
-                            <span class="detail-v" id="summary-vendor">Palo Alto Networks</span>
+                    <!-- Detailed Metadata Grid -->
+                    <div class="meta-card-grid">
+                        <div class="meta-item">
+                            <span class="meta-k">Device Platform</span>
+                            <span class="meta-v" id="summary-vendor">Palo Alto Networks</span>
                         </div>
-                        <div class="detail-cell">
-                            <span class="detail-k">Application Name</span>
-                            <span class="detail-v" id="summary-app">HTTPS / Web-Browsing</span>
+                        <div class="meta-item">
+                            <span class="meta-k">Layer 7 Application</span>
+                            <span class="meta-v" id="summary-app">HTTPS</span>
                         </div>
-                        <div class="detail-cell">
-                            <span class="detail-k">Session Duration</span>
-                            <span class="detail-v" id="summary-duration">0.05 seconds</span>
+                        <div class="meta-item">
+                            <span class="meta-k">Cryptographic Checksum</span>
+                            <span class="meta-v font-mono text-cyan" id="summary-hash-short">e113138aef...</span>
                         </div>
-                        <div class="detail-cell">
-                            <span class="detail-k">Threat / IoC Alert</span>
-                            <span class="detail-v" id="summary-threat">None Detected (Clean)</span>
+                        <div class="meta-item">
+                            <span class="meta-k">Threat / IoC Alert</span>
+                            <span class="meta-v" id="summary-threat">Clean (Zero Active IoCs)</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Standardized OCSF v1.2 JSON -->
-            <div id="tab-ocsf" class="tab-pane">
-                <pre class="code-box"><code id="code-ocsf">// Standardized OCSF v1.2 Network Activity JSON...</code></pre>
-            </div>
-
-            <!-- Tab 3: Forensic Lineage & SHA-256 -->
-            <div id="tab-lineage" class="tab-pane">
-                <div id="lineage-summary" class="lineage-wrap">
-                    <p class="empty-state">Process an event to view tamper-evident cryptographic lineage.</p>
+            <!-- Tab 2: 3-Phase Transformation Stepper (Wazuh Logtest-inspired) -->
+            <div id="tab-logtest" class="tab-content">
+                <div class="timeline-stepper" id="timeline-container">
+                    <!-- Phase 1 -->
+                    <div class="stepper-item">
+                        <div class="stepper-dot dot-cyan">1</div>
+                        <div class="stepper-body">
+                            <h4 class="stepper-title" id="phase-1-title">Phase 1: Ingestion &amp; Forensic Fingerprint</h4>
+                            <p class="stepper-desc" id="phase-1-desc">Raw log captured losslessly; SHA-256 cryptographic digest computed for tamper resistance.</p>
+                            <div class="stepper-meta-box" id="phase-1-meta">
+                                <span class="font-mono text-cyan" id="phase-1-hash">SHA-256: -</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Phase 2 -->
+                    <div class="stepper-item">
+                        <div class="stepper-dot dot-yellow">2</div>
+                        <div class="stepper-body">
+                            <h4 class="stepper-title" id="phase-2-title">Phase 2: Declarative YAML Extraction</h4>
+                            <p class="stepper-desc" id="phase-2-desc">Field tokens deconstructed according to device specifications without code changes.</p>
+                            <div class="stepper-meta-box" id="phase-2-meta">
+                                <span id="phase-2-details">Parser: -</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Phase 3 -->
+                    <div class="stepper-item">
+                        <div class="stepper-dot dot-green">3</div>
+                        <div class="stepper-body">
+                            <h4 class="stepper-title" id="phase-3-title">Phase 3: Universal Normalization &amp; Intelligence</h4>
+                            <p class="stepper-desc" id="phase-3-desc">Attributes mapped to OCSF v1.2 canonical class, MITRE ATT&amp;CK taxonomy, and 26-D ML vector.</p>
+                            <div class="stepper-meta-box" id="phase-3-meta">
+                                <span id="phase-3-details">Canonical Disposition: -</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tab 4: AI/ML Feature Vector -->
-            <div id="tab-ml" class="tab-pane">
+            <!-- Tab 3: MITRE ATT&CK & Compliance Matrix -->
+            <div id="tab-mitre" class="tab-content">
+                <div class="sec-intel-grid">
+                    <!-- MITRE Card -->
+                    <div class="intel-card">
+                        <div class="intel-head">
+                            <span class="intel-icon icon-red">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            </span>
+                            <div>
+                                <h4 class="intel-title">MITRE ATT&amp;CK® Adversary Context</h4>
+                                <span class="intel-sub">Automatic Tactics &amp; Techniques classification</span>
+                            </div>
+                        </div>
+                        <div class="intel-body" id="mitre-body">
+                            <div class="mitre-row">
+                                <span class="mitre-k">Enterprise Tactic:</span>
+                                <span class="mitre-tag tag-tactic" id="mitre-tactic">TA0011: Command and Control</span>
+                            </div>
+                            <div class="mitre-row">
+                                <span class="mitre-k">Technique:</span>
+                                <span class="mitre-tag tag-technique" id="mitre-technique">T1071.001: Web Protocols</span>
+                            </div>
+                            <div class="mitre-row">
+                                <span class="mitre-k">Reference Link:</span>
+                                <a href="#" target="_blank" class="text-cyan text-sm" id="mitre-link">View in MITRE Knowledgebase ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compliance Frameworks Card -->
+                    <div class="intel-card">
+                        <div class="intel-head">
+                            <span class="intel-icon icon-blue">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </span>
+                            <div>
+                                <h4 class="intel-title">Regulatory Compliance Coverage</h4>
+                                <span class="intel-sub">Mapped audit evidence for compliance standards</span>
+                            </div>
+                        </div>
+                        <div class="intel-body" id="compliance-body">
+                            <div class="compliance-badge-grid" id="compliance-badges">
+                                <div class="comp-badge"><strong>PCI-DSS v4.0:</strong> Req 10.2.1 / 10.2.4 (Perimeter Ingress Audit)</div>
+                                <div class="comp-badge"><strong>NIST SP 800-53:</strong> AC-4 &amp; AU-12 (Boundary Enforcement)</div>
+                                <div class="comp-badge"><strong>ISO 27001:</strong> Control A.12.4.1 (Event Logging &amp; Segregation)</div>
+                                <div class="comp-badge"><strong>HIPAA Security Rule:</strong> 164.312(b) (Transmission Audit)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Multi-Schema Export (OCSF, Wazuh, ECS) -->
+            <div id="tab-schema" class="tab-content">
+                <div class="schema-toggle-row">
+                    <span class="text-sm text-secondary">Export Format:</span>
+                    <div class="schema-btn-group">
+                        <button class="schema-btn active" id="btn-schema-ocsf" onclick="setSchemaView('ocsf')">OCSF v1.2 (Standard)</button>
+                        <button class="schema-btn" id="btn-schema-wazuh" onclick="setSchemaView('wazuh')">Wazuh 4.x Alert JSON</button>
+                        <button class="schema-btn" id="btn-schema-ecs" onclick="setSchemaView('ecs')">Elastic Common Schema (ECS)</button>
+                    </div>
+                </div>
+                <pre class="code-terminal"><code id="code-schema">// Schema export will render here...</code></pre>
+            </div>
+
+            <!-- Tab 5: AI/ML Feature Vector -->
+            <div id="tab-ml" class="tab-content">
                 <div id="ml-container">
-                    <p class="empty-state">Process an event to inspect its 26-dimensional AI/ML numerical feature vector.</p>
+                    <p class="empty-state">Process an event to view its 26-dimensional AI/ML numerical feature vector.</p>
                 </div>
             </div>
 
-            <!-- Tab 5: Unmapped Attributes (0% Loss) -->
-            <div id="tab-unmapped" class="tab-pane">
-                <div class="unmapped-info-box">
+            <!-- Tab 6: 0% Loss Unmapped Retention -->
+            <div id="tab-unmapped" class="tab-content">
+                <div class="unmapped-banner">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    <span><strong>100% Zero Information Loss:</strong> Any vendor-specific key not in the standard taxonomy is preserved here for audit compliance.</span>
+                    <span><strong>100% Zero Information Loss:</strong> Any vendor-specific key not covered in standard taxonomy is preserved in this partition for court-admissible forensic audit.</span>
                 </div>
-                <pre class="code-box"><code id="code-unmapped">// Preserved unmapped vendor attributes...</code></pre>
+                <pre class="code-terminal"><code id="code-unmapped">// Preserved unmapped vendor attributes...</code></pre>
             </div>
         </section>
     </main>
 
-    <!-- Bottom Section: Live Forensic Event Stream & Data Lake Audit -->
-    <section class="stream-section card">
-        <div class="card-header">
+    <!-- Bottom Section: Searchable Live Event Stream -->
+    <section class="card stream-card">
+        <div class="card-head">
             <div>
-                <h2 class="card-title">Live Forensic Event Stream &amp; Data Lake Audit</h2>
-                <p class="card-subtitle">Real-time normalized stream backed by SQLite and Apache Parquet</p>
+                <h2 class="head-title">Forensic Event Feed &amp; Data Lake Audit</h2>
+                <p class="head-sub">Normalized real-time stream emitted concurrently to Apache Parquet &amp; SQLite</p>
             </div>
-            <div class="stream-actions">
-                <input type="text" id="stream-search" placeholder="Filter by IP, Vendor, or Action..." oninput="filterStreamTable()">
-                <button class="btn btn-secondary btn-sm" onclick="fetchRecentEvents()">Refresh Feed</button>
+            <div class="stream-ctrls">
+                <input type="text" id="stream-search" placeholder="Search IP, Vendor, Action, or Protocol..." oninput="filterStreamTable()">
+                <button class="btn btn-secondary btn-sm" onclick="fetchRecentEvents()">Refresh Stream</button>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="modern-table">
+        <div class="table-wrap">
+            <table class="wazuh-table">
                 <thead>
                     <tr>
-                        <th>Status / Action</th>
+                        <th>Status</th>
                         <th>Severity</th>
                         <th>Device Vendor</th>
                         <th>Source Endpoint</th>
-                        <th>Destination Endpoint</th>
+                        <th>Target Endpoint</th>
                         <th>Protocol</th>
                         <th>Cryptographic SHA-256</th>
                     </tr>
                 </thead>
                 <tbody id="stream-tbody">
                     <tr>
-                        <td colspan="7" class="empty-table">No logs in database yet. Click <strong>"Load Sample Fleet Logs"</strong> above to populate.</td>
+                        <td colspan="7" class="empty-table">No events in database. Click <strong>"Ingest Perimeter Fleet Samples"</strong> above to populate.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </section>
 
-    <!-- Educational Modal for Non-Tech Stakeholders -->
-    <div class="modal-overlay" id="help-modal" style="display: none;" onclick="toggleHelpModal()">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3>How ULPF Works (In Plain English)</h3>
-                <button class="btn-close" onclick="toggleHelpModal()">&times;</button>
+    <!-- Modal: Architecture & Non-Tech Plain English Guide -->
+    <div class="modal-backdrop" id="help-modal" style="display: none;" onclick="toggleHelpModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-head">
+                <h3>ULPF Architectural Overview</h3>
+                <button class="btn-x" onclick="toggleHelpModal()">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="help-item">
-                    <div class="help-num">1</div>
+            <div class="modal-content">
+                <div class="guide-item">
+                    <div class="guide-badge">1</div>
                     <div>
-                        <h4>The Heterogeneous Log Problem</h4>
-                        <p>Every firewall brand speaks a different language. Cisco says <code>Built</code>, Palo Alto says <code>allow</code>, and Fortinet says <code>action="accept"</code>. Comparing them manually is slow and error-prone.</p>
+                        <h4>Dual-Mode Deployment: Air-Gapped &amp; Public Web Cloud</h4>
+                        <p>ULPF runs either completely isolated in defense/banking air-gapped enclaves with zero internet calls, or as a public SaaS normalization gateway with standard HTTPS endpoints.</p>
                     </div>
                 </div>
-                <div class="help-item">
-                    <div class="help-num">2</div>
+                <div class="guide-item">
+                    <div class="guide-badge">2</div>
                     <div>
-                        <h4>Universal Standardization (OCSF v1.2)</h4>
-                        <p>ULPF acts like a universal translator. It takes all those conflicting terms and turns them into a single, clean standard: <code>Allowed</code>, <code>Blocked</code>, or <code>Reset</code>.</p>
+                        <h4>Wazuh-Inspired Threat &amp; Compliance Engine</h4>
+                        <p>Every perimeter event is automatically classified against the <strong>MITRE ATT&amp;CK Enterprise Matrix</strong> and mapped to <strong>PCI-DSS, NIST 800-53, ISO 27001, and HIPAA</strong> audit requirements.</p>
                     </div>
                 </div>
-                <div class="help-item">
-                    <div class="help-num">3</div>
+                <div class="guide-item">
+                    <div class="guide-badge">3</div>
                     <div>
-                        <h4>100% Lossless Guarantee</h4>
-                        <p>We never throw away your original log. It is stored verbatim alongside a tamper-proof SHA-256 digital fingerprint, so forensic investigators have courtroom-admissible evidence.</p>
+                        <h4>Universal Multi-Schema Interoperability</h4>
+                        <p>Exports losslessly to <strong>OCSF v1.2</strong>, <strong>Wazuh 4.x Alert JSON</strong>, and <strong>Elastic Common Schema (ECS)</strong> simultaneously.</p>
                     </div>
                 </div>
-                <div class="help-item">
-                    <div class="help-num">4</div>
+                <div class="guide-item">
+                    <div class="guide-badge">4</div>
                     <div>
-                        <h4>AI &amp; Machine Learning Ready</h4>
-                        <p>Instead of requiring data scientists to clean text files for hours, ULPF extracts 26 mathematical numbers (bytes ratios, port types, risk scores) on every event in 0.12 milliseconds.</p>
+                        <h4>Courtroom-Admissible Forensic Provenance</h4>
+                        <p>Every event is tied to its original unedited bytes using a <strong>SHA-256 digital fingerprint</strong> with unmapped field retention guaranteeing zero data loss.</p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="toggleHelpModal()">Got it, let's explore!</button>
+            <div class="modal-foot">
+                <button class="btn btn-primary" onclick="toggleHelpModal()">Close Guide</button>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="toast-popup" style="display: none;">Copied to clipboard!</div>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display: none;">Copied to clipboard!</div>
 
     <footer class="footer">
-        <p>Universal Log Pre-processing Framework (ULPF) &bull; Production Cybersecurity Architecture &bull; Aligned with OCSF &amp; ECS</p>
+        <p>Universal Log Pre-processing Framework (ULPF) &bull; Enterprise XDR &amp; SIEM Data Architecture &bull; Aligned with OCSF &amp; Wazuh</p>
     </footer>
 
     <script src="/static/app.js"></script>
