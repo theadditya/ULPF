@@ -568,47 +568,199 @@ textarea#raw-log-input:focus {
 }
 
 /* ==========================================================================
-   Tab 1: Visual Summary & Dynamic Threat Risk Meter
+   Tab 1: Visual Summary & Executive Intelligence
    ========================================================================== */
-.verdict-banner {
+.narrative-card {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(2, 132, 199, 0.05));
+    border: 1px solid var(--border-hover);
+    border-left: 4px solid var(--cyan);
+    border-radius: 10px;
+    padding: 0.85rem 1.15rem;
+    margin-bottom: 1rem;
+}
+
+.narrative-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.35rem;
+}
+
+.narrative-icon {
+    font-size: 1rem;
+}
+
+.narrative-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--cyan);
+    text-transform: uppercase;
+}
+
+.narrative-text {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Inspection Gateway Flow */
+.inspection-flow {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    gap: 0.75rem;
+    align-items: stretch;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.flow-node {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.node-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+}
+
+.node-ip {
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-primary);
+    margin-bottom: 0.45rem;
+    word-break: break-all;
+}
+
+.node-sub {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.85rem 1.15rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-elevated);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
 }
 
-.verdict-left { display: flex; align-items: center; gap: 0.75rem; }
+.gateway-node {
+    background: linear-gradient(180deg, var(--bg-surface), var(--bg-elevated));
+    border: 2px solid var(--border-hover);
+    border-radius: 10px;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.45rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.gw-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.gw-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.gw-rule {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.gw-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+}
 
 .verdict-pill {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.25rem 0.65rem;
+    letter-spacing: 0.06em;
+    padding: 0.25rem 0.75rem;
     border-radius: 6px;
 }
 
-.act-allowed { background-color: var(--success); color: #ffffff; }
-.act-blocked { background-color: var(--danger); color: #ffffff; }
+.act-allowed {
+    background-color: var(--success);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
 
-.verdict-flow-text { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+.act-blocked {
+    background-color: var(--danger);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
 
-/* Dynamic Risk Meter */
+/* Dynamic Risk Breakdown Card */
+.risk-breakdown-card {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.85rem 1.15rem;
+    margin-bottom: 1rem;
+}
+
+.risk-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.65rem;
+}
+
+.risk-head-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.risk-card-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.risk-level-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+
+.risk-low { background-color: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+.risk-medium { background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+.risk-high, .risk-critical { background-color: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
 .risk-meter-wrap {
     display: flex;
     align-items: center;
     gap: 0.6rem;
 }
 
-.risk-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
-
 .risk-bar-outer {
     width: 90px;
-    height: 9px;
+    height: 8px;
     background-color: var(--bg-base);
     border-radius: 9999px;
     overflow: hidden;
@@ -629,49 +781,29 @@ textarea#raw-log-input:focus {
     color: var(--text-primary);
 }
 
-/* Flow Connector Box */
-.flow-box {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 1rem;
-    align-items: center;
-    background-color: var(--bg-subtle);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.15rem;
-    margin-bottom: 1rem;
+.risk-factors-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
 }
 
-.endpoint-card {
+.risk-factor-pill {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.85rem;
-}
-
-.endpoint-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.endpoint-ip {
-    font-size: 1.1rem;
-    font-weight: 800;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text-primary);
-    margin-bottom: 0.35rem;
-}
-
-.endpoint-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
     font-size: 0.75rem;
     color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.rf-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--cyan);
 }
 
 .scope-pill {
@@ -686,50 +818,6 @@ textarea#raw-log-input:focus {
 .scope-public {
     background-color: var(--cyan-glow);
     color: var(--cyan);
-}
-
-.flow-connector {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.flow-proto-tag {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--cyan);
-    font-family: 'JetBrains Mono', monospace;
-    background-color: var(--bg-surface);
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-}
-
-.connector-line {
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, var(--border-color), var(--cyan), var(--border-color));
-    position: relative;
-}
-
-.connector-line::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: -3px;
-    width: 6px;
-    height: 6px;
-    border-top: 2px solid var(--cyan);
-    border-right: 2px solid var(--cyan);
-    transform: rotate(45deg);
-}
-
-.flow-size {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    font-family: 'JetBrains Mono', monospace;
 }
 
 /* Metadata Grid */
@@ -749,73 +837,242 @@ textarea#raw-log-input:focus {
 }
 
 .meta-k { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
-.meta-v { font-size: 0.85rem; color: var(--text-primary); font-weight: 600; }
+.meta-v { font-size: 0.84rem; color: var(--text-primary); font-weight: 600; }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 
 /* ==========================================================================
-   Tab 2: 3-Phase Transformation Pipeline Stepper
+   Tab 2: 3-Phase Transformation Pipeline (Dynamic Stack)
    ========================================================================== */
-.timeline-stepper {
+.pipeline-stack {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    position: relative;
-    padding-left: 0.5rem;
-}
-
-.timeline-stepper::before {
-    content: '';
-    position: absolute;
-    left: 19px;
-    top: 20px;
-    bottom: 20px;
-    width: 2px;
-    background-color: var(--border-color);
-}
-
-.stepper-item {
-    display: flex;
     gap: 1.15rem;
-    position: relative;
 }
 
-.stepper-dot {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+.phase-card {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.phase-card:hover {
+    border-color: var(--border-hover);
+}
+
+.phase-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.15rem;
+    background-color: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.phase-badge-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.phase-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    z-index: 2;
-    background-color: var(--bg-surface);
-    border: 2px solid var(--border-color);
-}
-
-.dot-cyan { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
-.dot-yellow { border-color: var(--warning); color: var(--warning); }
-.dot-green { border-color: var(--success); color: var(--success); }
-
-.stepper-body {
-    background-color: var(--bg-subtle);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 0.85rem 1.15rem;
-    flex: 1;
-}
-
-.stepper-title { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
-.stepper-desc { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
-.stepper-meta-box {
-    background-color: var(--bg-base);
-    border: 1px solid var(--border-color);
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+}
+
+.phase-num-cyan {
+    background-color: var(--cyan-glow);
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+}
+
+.phase-num-yellow {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid var(--warning);
+}
+
+.phase-num-green {
+    background-color: var(--success-bg);
+    color: var(--success);
+    border: 1px solid var(--success-border);
+}
+
+.phase-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.15rem;
+}
+
+.phase-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.phase-status-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+}
+
+.status-green {
+    background-color: var(--success-bg);
+    color: var(--success);
+    border: 1px solid var(--success-border);
+}
+
+.status-yellow {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.phase-card-body {
+    padding: 1rem 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.phase-raw-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.phase-code-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.phase-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+}
+
+.phase-meta-item {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.pm-k {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.pm-v {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
     word-break: break-all;
+}
+
+/* Extracted Tokens Grid */
+.extracted-tokens-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.tokens-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tokens-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.tokens-count {
+    font-size: 0.72rem;
+    color: var(--cyan);
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.tokens-pill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.extracted-token-pill {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 0.35rem 0.55rem;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+}
+
+.tok-k {
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.tok-v {
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+}
+
+/* Sinks Dispatched */
+.sinks-dispatched-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.sinks-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.sinks-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.sink-badge {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 /* ==========================================================================

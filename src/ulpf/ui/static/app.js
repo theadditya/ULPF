@@ -106,6 +106,8 @@ function switchTab(tabId) {
 
     if (tabId === 'tab-schema') {
         setSchemaView(currentSchemaView);
+    } else if (tabId === 'tab-logtest' && currentEventData) {
+        renderPipelineTrace(currentEventData);
     }
 }
 
@@ -207,30 +209,47 @@ function renderResults(data) {
 
     const action = (event.disposition && event.disposition.value) ? event.disposition.value : (event.disposition || 'Unknown');
     const isAllowed = action === 'Allowed';
+    const isThreat = event.threat && event.threat.signature_name;
+
+    // Narrative Box
+    const narrativeEl = document.getElementById('summary-narrative-text');
+    if (narrativeEl) {
+        narrativeEl.innerText = data.narrative || (isAllowed
+            ? `Authorized network connection permitted through ${event.product.vendor_name} firewall gateway.`
+            : `Perimeter defense active: Connection actively blocked by ${event.product.vendor_name} to protect internal network.`);
+    }
+    const narrativeIcon = document.getElementById('narrative-icon');
+    if (narrativeIcon) {
+        narrativeIcon.innerText = isThreat ? '🚨' : (isAllowed ? '✅' : '🛡️');
+    }
+
+    // Inspection Flow Center Gateway
     const verdictAction = document.getElementById('verdict-action');
     if (verdictAction) {
-        verdictAction.innerText = action;
+        verdictAction.innerText = action.toUpperCase();
         verdictAction.className = `verdict-pill ${isAllowed ? 'act-allowed' : 'act-blocked'}`;
     }
 
     const dir = (event.connection_info && event.connection_info.direction && event.connection_info.direction.value)
         ? event.connection_info.direction.value
         : (event.connection_info.direction || 'Unknown');
-    const verdictDir = document.getElementById('verdict-direction');
-    if (verdictDir) verdictDir.innerText = `Flow Direction: ${dir}`;
 
-    // Risk Meter Bar & Score
-    const riskBar = document.getElementById('risk-bar-fill');
-    if (riskBar) riskBar.style.width = `${risk.score}%`;
-    const riskScoreText = document.getElementById('risk-score-text');
-    if (riskScoreText) riskScoreText.innerText = `${risk.score} / 100 (${risk.level})`;
+    const totalBytes = event.traffic.total_bytes || (event.traffic.bytes_in + event.traffic.bytes_out) || 0;
+    const bytesFormatted = totalBytes > 1024 ? `${(totalBytes / 1024).toFixed(1)} KB` : `${totalBytes} B`;
+    const protoStr = (event.connection_info.protocol_name || 'IP').toUpperCase();
 
-    // Endpoints & Scope
+    const ruleName = (event.unmapped && (event.unmapped.rule_name || event.unmapped.policyid || event.unmapped.rule || event.unmapped['access-group'])) || 'Access Policy Enforced';
+    const gwRuleEl = document.getElementById('summary-gw-rule');
+    if (gwRuleEl) gwRuleEl.innerText = `Policy: ${ruleName}`;
+    const gwMetaEl = document.getElementById('summary-gw-meta');
+    if (gwMetaEl) gwMetaEl.innerText = `${protoStr} • ${dir} • ${bytesFormatted}`;
+
+    // Endpoints
     const srcIpEl = document.getElementById('summary-src-ip');
     if (srcIpEl) srcIpEl.innerText = event.src_endpoint.ip || '0.0.0.0';
     const srcPortEl = document.getElementById('summary-src-port');
     if (srcPortEl) srcPortEl.innerText = event.src_endpoint.port || '—';
-    const srcScope = event.src_endpoint.is_internal ? 'Internal LAN' : (event.src_endpoint.country || 'Public');
+    const srcScope = event.src_endpoint.is_internal ? 'Internal LAN' : (event.src_endpoint.country || 'Public Internet');
     const srcScopeEl = document.getElementById('summary-src-scope');
     if (srcScopeEl) srcScopeEl.innerText = srcScope;
 
@@ -238,46 +257,56 @@ function renderResults(data) {
     if (dstIpEl) dstIpEl.innerText = event.dst_endpoint.ip || '0.0.0.0';
     const dstPortEl = document.getElementById('summary-dst-port');
     if (dstPortEl) dstPortEl.innerText = event.dst_endpoint.port || '—';
-    const dstScope = event.dst_endpoint.is_internal ? 'Internal LAN' : (event.dst_endpoint.country || 'Public');
+    const dstScope = event.dst_endpoint.is_internal ? 'Internal LAN' : (event.dst_endpoint.country || 'Public Internet');
     const dstBadge = document.getElementById('summary-dst-scope');
     if (dstBadge) {
         dstBadge.innerText = dstScope;
         dstBadge.className = `scope-pill ${event.dst_endpoint.is_internal ? '' : 'scope-public'}`;
     }
 
-    const protoEl = document.getElementById('summary-proto');
-    if (protoEl) protoEl.innerText = (event.connection_info.protocol_name || 'IP').toUpperCase();
+    // Dynamic Risk Meter & Factors
+    const riskBar = document.getElementById('risk-bar-fill');
+    if (riskBar) riskBar.style.width = `${risk.score}%`;
+    const riskScoreText = document.getElementById('risk-score-text');
+    if (riskScoreText) riskScoreText.innerText = `${risk.score} / 100`;
+    const riskLevelBadge = document.getElementById('risk-level-badge');
+    if (riskLevelBadge) {
+        riskLevelBadge.innerText = `${risk.level} Risk`;
+        riskLevelBadge.className = `risk-level-badge risk-${risk.level.toLowerCase()}`;
+    }
 
-    const totalBytes = event.traffic.total_bytes || (event.traffic.bytes_in + event.traffic.bytes_out) || 0;
-    const bytesFormatted = totalBytes > 1024 ? `${(totalBytes / 1024).toFixed(1)} KB` : `${totalBytes} B`;
-    const bytesEl = document.getElementById('summary-bytes');
-    if (bytesEl) bytesEl.innerText = bytesFormatted;
+    const factorsContainer = document.getElementById('risk-factors-container');
+    if (factorsContainer) {
+        const factors = risk.factors && risk.factors.length > 0 ? risk.factors : ['Perimeter traffic within normal baseline parameters'];
+        factorsContainer.innerHTML = factors.map(f => `
+            <div class="risk-factor-pill">
+                <span class="rf-dot"></span>
+                <span>${f}</span>
+            </div>
+        `).join('');
+    }
 
+    // Session Metadata Grid
     const vendorEl = document.getElementById('summary-vendor');
     if (vendorEl) vendorEl.innerText = `${event.product.vendor_name} (${event.product.product_name})`;
     const appEl = document.getElementById('summary-app');
-    if (appEl) appEl.innerText = event.app_name || 'Standard Network Traffic';
+    if (appEl) appEl.innerText = event.app_name || (event.dst_endpoint.port === 80 || event.dst_endpoint.port === 443 ? 'HTTP/HTTPS Web Traffic' : 'Standard IP Session');
     const hashEl = document.getElementById('summary-hash-short');
     if (hashEl) hashEl.innerText = (event.lineage.raw_hash || '').substring(0, 16) + '...';
 
     const threatEl = document.getElementById('summary-threat');
     if (threatEl) {
-        if (event.threat && event.threat.signature_name) {
+        if (isThreat) {
             threatEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">🚨 ${event.threat.signature_name}</span>`;
+        } else if (!isAllowed) {
+            threatEl.innerHTML = `<span style="color:var(--warning); font-weight:700;">🛡️ Suspicious Ingress Blocked</span>`;
         } else {
             threatEl.innerHTML = `<span style="color:var(--success); font-weight:600;">Clean (Zero Active IoCs)</span>`;
         }
     }
 
-    // 3. Tab 2: 3-Phase Transformation Stepper
-    if (phases) {
-        const p1Hash = document.getElementById('phase-1-hash');
-        if (p1Hash) p1Hash.innerText = `SHA-256 Digest: ${phases.phase_1.sha256} (${phases.phase_1.raw_length} bytes losslessly preserved)`;
-        const p2Details = document.getElementById('phase-2-details');
-        if (p2Details) p2Details.innerText = `Parser: ${phases.phase_2.parser_id} | Vendor: ${phases.phase_2.vendor} | Retained Unmapped Keys: ${phases.phase_2.unmapped_retained}`;
-        const p3Details = document.getElementById('phase-3-details');
-        if (p3Details) p3Details.innerText = `Disposition: ${phases.phase_3.action} | Direction: ${phases.phase_3.direction} | MITRE Tactic: ${phases.phase_3.mitre_tactic} | ML Features: ${phases.phase_3.ml_features_count}D`;
-    }
+    // 3. Tab 2: 3-Phase Transformation Pipeline Stepper
+    renderPipelineTrace(data);
 
     // 4. Tab 3: MITRE ATT&CK & Compliance
     if (mitre) {
@@ -310,6 +339,63 @@ function renderResults(data) {
 
     // 7. Tab 6: 0% Loss Unmapped Retention & Traceability
     renderLosslessAuditTab(data);
+}
+
+// ==========================================
+// Render 3-Phase Transformation Pipeline
+// ==========================================
+function renderPipelineTrace(data) {
+    const phases = data.phases;
+    if (!phases) return;
+
+    // Phase 1: Ingestion & Fingerprint
+    const p1Raw = document.getElementById('phase-1-raw-stream');
+    if (p1Raw) p1Raw.innerText = phases.phase_1.raw_log || data.event.raw_event;
+
+    const p1Sha = document.getElementById('phase-1-sha');
+    if (p1Sha) p1Sha.innerText = phases.phase_1.sha256;
+
+    const p1Len = document.getElementById('phase-1-length');
+    if (p1Len) p1Len.innerText = `${phases.phase_1.raw_length} Bytes (0.0% loss)`;
+
+    const p1Time = document.getElementById('phase-1-time');
+    if (p1Time) p1Time.innerText = phases.phase_1.ingestion_timestamp;
+
+    // Phase 2: Declarative Extraction
+    const p2Parser = document.getElementById('phase-2-parser');
+    if (p2Parser) p2Parser.innerText = phases.phase_2.parser_name || phases.phase_2.parser_id;
+
+    const p2Format = document.getElementById('phase-2-format');
+    if (p2Format) p2Format.innerText = phases.phase_2.format;
+
+    const p2Conf = document.getElementById('phase-2-confidence');
+    if (p2Conf) p2Conf.innerText = `${phases.phase_2.confidence}% Confidence`;
+
+    const p2Count = document.getElementById('phase-2-count');
+    if (p2Count) p2Count.innerText = `${phases.phase_2.extracted_count} Tokens Extracted • ${phases.phase_2.unmapped_retained} Retained Unmapped`;
+
+    const tokensGrid = document.getElementById('phase-2-tokens-grid');
+    if (tokensGrid) {
+        const fields = phases.phase_2.extracted_fields || {};
+        const entries = Object.entries(fields);
+        if (entries.length === 0) {
+            tokensGrid.innerHTML = `<span class="text-muted" style="font-size:0.75rem;">No discrete tokens found.</span>`;
+        } else {
+            tokensGrid.innerHTML = entries.map(([k, v]) => `
+                <div class="extracted-token-pill" title="${k}: ${v}">
+                    <span class="tok-k">${k}</span>
+                    <span class="tok-v">${v.length > 28 ? v.substring(0, 26) + '...' : v}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Phase 3: Canonical Normalization & Sinks
+    const p3Disp = document.getElementById('phase-3-disp');
+    if (p3Disp) p3Disp.innerText = `${phases.phase_3.action} (${phases.phase_3.direction})`;
+
+    const p3Mitre = document.getElementById('phase-3-mitre');
+    if (p3Mitre) p3Mitre.innerText = `${phases.phase_3.mitre_tactic} (${phases.phase_3.mitre_technique || 'Standard Policy'})`;
 }
 
 // ==========================================

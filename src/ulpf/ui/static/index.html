@@ -204,7 +204,7 @@
                 </button>
             </div>
 
-            <!-- Tab 1: Visual Summary Card (Human Friendly) -->
+            <!-- Tab 1: Visual Summary Card (Human & Executive Friendly) -->
             <div id="tab-summary" class="tab-content active">
                 <div id="summary-empty" class="empty-state">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
@@ -212,66 +212,85 @@
                 </div>
 
                 <div id="summary-content" style="display: none;">
-                    <!-- Threat Risk Gauge & Verdict Bar -->
-                    <div class="verdict-banner">
-                        <div class="verdict-left">
-                            <span class="verdict-pill" id="verdict-action">Allowed</span>
-                            <span class="verdict-flow-text" id="verdict-direction">Outbound (LAN ➔ Public Internet)</span>
+                    <!-- Plain-English Executive Summary Card -->
+                    <div class="narrative-card" id="summary-narrative-card">
+                        <div class="narrative-badge">
+                            <span class="narrative-icon" id="narrative-icon">🛡️</span>
+                            <span class="narrative-label">EXECUTIVE SECURITY SUMMARY</span>
                         </div>
-                        <div class="verdict-right">
-                            <div class="risk-meter-wrap">
-                                <span class="risk-label">Threat Risk Index:</span>
-                                <div class="risk-bar-outer">
-                                    <div class="risk-bar-inner" id="risk-bar-fill" style="width: 25%;"></div>
-                                </div>
-                                <span class="risk-score-text" id="risk-score-text">25 / 100</span>
-                            </div>
-                        </div>
+                        <p class="narrative-text" id="summary-narrative-text">
+                            Analyzing event stream...
+                        </p>
                     </div>
 
-                    <!-- Flow Diagram Card -->
-                    <div class="flow-box">
-                        <div class="endpoint-card">
-                            <span class="endpoint-label">SOURCE ENDPOINT</span>
-                            <h4 class="endpoint-ip" id="summary-src-ip">192.168.1.50</h4>
-                            <div class="endpoint-meta">
+                    <!-- Interactive Inspection Gateway Flow -->
+                    <div class="inspection-flow">
+                        <!-- Source Node -->
+                        <div class="flow-node">
+                            <span class="node-title">SOURCE INITIATOR</span>
+                            <h4 class="node-ip" id="summary-src-ip">198.51.100.42</h4>
+                            <div class="node-sub">
                                 <span>Port: <strong id="summary-src-port">54123</strong></span>
-                                <span class="scope-pill" id="summary-src-scope">Internal LAN</span>
+                                <span class="scope-pill" id="summary-src-scope">Public Internet</span>
                             </div>
                         </div>
 
-                        <div class="flow-connector">
-                            <span class="flow-proto-tag" id="summary-proto">TCP</span>
-                            <div class="connector-line"></div>
-                            <span class="flow-size" id="summary-bytes">1.4 KB</span>
+                        <!-- Inspection Gateway Center -->
+                        <div class="gateway-node">
+                            <span class="gw-label">PERIMETER GATEWAY</span>
+                            <span class="verdict-pill" id="verdict-action">BLOCKED</span>
+                            <div class="gw-details">
+                                <span class="gw-rule" id="summary-gw-rule">Rule: BLOCK_SUSPICIOUS</span>
+                                <span class="gw-meta" id="summary-gw-meta">TCP &bull; Inbound &bull; 64 B</span>
+                            </div>
                         </div>
 
-                        <div class="endpoint-card">
-                            <span class="endpoint-label">TARGET ENDPOINT</span>
-                            <h4 class="endpoint-ip" id="summary-dst-ip">104.16.24.1</h4>
-                            <div class="endpoint-meta">
-                                <span>Port: <strong id="summary-dst-port">443</strong></span>
-                                <span class="scope-pill scope-public" id="summary-dst-scope">Public Internet</span>
+                        <!-- Target Node -->
+                        <div class="flow-node">
+                            <span class="node-title">TARGET DESTINATION</span>
+                            <h4 class="node-ip" id="summary-dst-ip">10.0.1.50</h4>
+                            <div class="node-sub">
+                                <span>Port: <strong id="summary-dst-port">80</strong></span>
+                                <span class="scope-pill" id="summary-dst-scope">Internal LAN</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Detailed Metadata Grid -->
+                    <!-- Dynamic Risk Breakdown Card -->
+                    <div class="risk-breakdown-card">
+                        <div class="risk-card-head">
+                            <div class="risk-head-left">
+                                <span class="risk-card-title">Threat Risk Assessment</span>
+                                <span class="risk-level-badge" id="risk-level-badge">Medium Risk</span>
+                            </div>
+                            <div class="risk-meter-wrap">
+                                <div class="risk-bar-outer">
+                                    <div class="risk-bar-inner" id="risk-bar-fill" style="width: 45%;"></div>
+                                </div>
+                                <span class="risk-score-text" id="risk-score-text">45 / 100</span>
+                            </div>
+                        </div>
+                        <div class="risk-factors-list" id="risk-factors-container">
+                            <!-- Dynamic risk factors pills -->
+                        </div>
+                    </div>
+
+                    <!-- Session Metadata Grid -->
                     <div class="meta-card-grid">
                         <div class="meta-item">
-                            <span class="meta-k">Device Platform</span>
-                            <span class="meta-v" id="summary-vendor">Palo Alto Networks</span>
+                            <span class="meta-k">Perimeter Appliance</span>
+                            <span class="meta-v" id="summary-vendor">Palo Alto Networks (PAN-OS)</span>
                         </div>
                         <div class="meta-item">
                             <span class="meta-k">Layer 7 Application</span>
-                            <span class="meta-v" id="summary-app">HTTPS</span>
+                            <span class="meta-v" id="summary-app">web-browsing</span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-k">Cryptographic Checksum</span>
-                            <span class="meta-v font-mono text-cyan" id="summary-hash-short">e113138aef...</span>
+                            <span class="meta-k">Cryptographic Fingerprint</span>
+                            <span class="meta-v font-mono text-cyan" id="summary-hash-short">27f38eda8c...</span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-k">Threat / IoC Alert</span>
+                            <span class="meta-k">IoC Signature Alert</span>
                             <span class="meta-v" id="summary-threat">Clean (Zero Active IoCs)</span>
                         </div>
                     </div>
@@ -280,37 +299,115 @@
 
             <!-- Tab 2: 3-Phase Transformation Pipeline -->
             <div id="tab-logtest" class="tab-content">
-                <div class="timeline-stepper" id="timeline-container">
-                    <!-- Phase 1 -->
-                    <div class="stepper-item">
-                        <div class="stepper-dot dot-cyan">1</div>
-                        <div class="stepper-body">
-                            <h4 class="stepper-title" id="phase-1-title">Phase 1: Ingestion &amp; Forensic Fingerprint</h4>
-                            <p class="stepper-desc" id="phase-1-desc">Raw log captured losslessly; SHA-256 cryptographic digest computed for tamper resistance.</p>
-                            <div class="stepper-meta-box">
-                                <span class="font-mono text-cyan" id="phase-1-hash">SHA-256: -</span>
+                <div class="pipeline-stack" id="pipeline-stack">
+                    <!-- Phase 1: Ingestion & Forensic Fingerprint -->
+                    <div class="phase-card">
+                        <div class="phase-card-head">
+                            <div class="phase-badge-wrap">
+                                <span class="phase-num phase-num-cyan">1</span>
+                                <div>
+                                    <h4 class="phase-title">Phase 1: Ingestion &amp; Cryptographic Fingerprint</h4>
+                                    <p class="phase-sub">Verbatim raw log captured without loss; SHA-256 digital fingerprint computed</p>
+                                </div>
+                            </div>
+                            <span class="phase-status-badge status-green" id="phase-1-status">✔ Lossless Verified</span>
+                        </div>
+                        <div class="phase-card-body">
+                            <div class="phase-raw-preview">
+                                <span class="phase-code-label">Verbatim Captured Stream:</span>
+                                <pre class="code-terminal"><code id="phase-1-raw-stream">// Captured raw stream...</code></pre>
+                            </div>
+                            <div class="phase-meta-grid">
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">SHA-256 Digest</span>
+                                    <span class="pm-v font-mono text-cyan" id="phase-1-sha">e113138a...</span>
+                                </div>
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Byte Length</span>
+                                    <span class="pm-v" id="phase-1-length">301 Bytes (0.0% loss)</span>
+                                </div>
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Ingestion Timestamp</span>
+                                    <span class="pm-v font-mono" id="phase-1-time">2026-09-22 18:00:15 UTC</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Phase 2 -->
-                    <div class="stepper-item">
-                        <div class="stepper-dot dot-yellow">2</div>
-                        <div class="stepper-body">
-                            <h4 class="stepper-title" id="phase-2-title">Phase 2: Declarative YAML Extraction</h4>
-                            <p class="stepper-desc" id="phase-2-desc">Field tokens deconstructed according to device specifications without code changes.</p>
-                            <div class="stepper-meta-box">
-                                <span id="phase-2-details">Parser: -</span>
+
+                    <!-- Phase 2: Declarative YAML Extraction -->
+                    <div class="phase-card">
+                        <div class="phase-card-head">
+                            <div class="phase-badge-wrap">
+                                <span class="phase-num phase-num-yellow">2</span>
+                                <div>
+                                    <h4 class="phase-title">Phase 2: Declarative Extraction (Deconstruction)</h4>
+                                    <p class="phase-sub">Zero-shot heuristic plugin match; tokens parsed into key-value attributes</p>
+                                </div>
+                            </div>
+                            <span class="phase-status-badge status-yellow" id="phase-2-status">⚡ 100% YAML Match</span>
+                        </div>
+                        <div class="phase-card-body">
+                            <div class="phase-meta-grid">
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Matched Parser Rule</span>
+                                    <span class="pm-v font-mono text-cyan" id="phase-2-parser">palo_alto_traffic</span>
+                                </div>
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Parsing Format</span>
+                                    <span class="pm-v" id="phase-2-format">CSV Delimited</span>
+                                </div>
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Parser Confidence</span>
+                                    <span class="pm-v text-green" id="phase-2-confidence">95.0% Confidence</span>
+                                </div>
+                            </div>
+                            <div class="extracted-tokens-wrap">
+                                <div class="tokens-head">
+                                    <span class="tokens-label">Extracted Attribute Tokens:</span>
+                                    <span class="tokens-count" id="phase-2-count">39 Tokens Extracted</span>
+                                </div>
+                                <div class="tokens-pill-grid" id="phase-2-tokens-grid">
+                                    <!-- Extracted tokens populated dynamically -->
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Phase 3 -->
-                    <div class="stepper-item">
-                        <div class="stepper-dot dot-green">3</div>
-                        <div class="stepper-body">
-                            <h4 class="stepper-title" id="phase-3-title">Phase 3: Universal Normalization &amp; Intelligence</h4>
-                            <p class="stepper-desc" id="phase-3-desc">Attributes mapped to OCSF v1.2 canonical class, MITRE ATT&amp;CK taxonomy, and 26-D ML vector.</p>
-                            <div class="stepper-meta-box">
-                                <span id="phase-3-details">Canonical Disposition: -</span>
+
+                    <!-- Phase 3: Canonical Normalization & Big Data Sinks -->
+                    <div class="phase-card">
+                        <div class="phase-card-head">
+                            <div class="phase-badge-wrap">
+                                <span class="phase-num phase-num-green">3</span>
+                                <div>
+                                    <h4 class="phase-title">Phase 3: Canonical Normalization &amp; Big Data Sinks</h4>
+                                    <p class="phase-sub">Mapped to OCSF Class 4001, MITRE ATT&amp;CK enriched, vectorized &amp; dispatched</p>
+                                </div>
+                            </div>
+                            <span class="phase-status-badge status-green" id="phase-3-status">🛡️ OCSF v1.2 Standardized</span>
+                        </div>
+                        <div class="phase-card-body">
+                            <div class="phase-meta-grid">
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Canonical Schema Class</span>
+                                    <span class="pm-v font-mono text-green">OCSF 4001 Network Activity</span>
+                                </div>
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">Canonical Disposition</span>
+                                    <span class="pm-v" id="phase-3-disp">Blocked</span>
+                                </div>
+                                <div class="phase-meta-item">
+                                    <span class="pm-k">MITRE ATT&amp;CK Context</span>
+                                    <span class="pm-v text-cyan" id="phase-3-mitre">TA0011: Command and Control</span>
+                                </div>
+                            </div>
+                            <div class="sinks-dispatched-box">
+                                <span class="sinks-label">Data Lake &amp; SIEM Sinks Dispatched Concurrently:</span>
+                                <div class="sinks-badge-row">
+                                    <span class="sink-badge">📦 Apache Parquet (Snappy Columnar)</span>
+                                    <span class="sink-badge">🗄️ Forensic SQLite Database</span>
+                                    <span class="sink-badge">⚡ Real-Time Streaming JSON-L</span>
+                                    <span class="sink-badge">🤖 26-D AI/ML Vector Matrix</span>
+                                </div>
                             </div>
                         </div>
                     </div>
