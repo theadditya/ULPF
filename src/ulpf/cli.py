@@ -117,9 +117,21 @@ def cmd_test_parsers(args):
     print(f"\nResult: {success}/{len(lines)} tests passed ({success/len(lines)*100:.1f}%)")
 
 
+def cmd_test(args):
+    import pytest
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    tests_dir = os.path.join(base_dir, "tests")
+    print(f"[*] Running automated test suite in {tests_dir}...\n")
+    ret = pytest.main(["-v", tests_dir])
+    sys.exit(ret)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Universal Log Pre-processing Framework (ULPF) CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # test
+    subparsers.add_parser("test", help="Run automated unit & integration tests")
 
     # parse
     p_parse = subparsers.add_parser("parse", help="Parse and normalize logs")
@@ -142,7 +154,9 @@ def main():
     subparsers.add_parser("test-parsers", help="Validate loaded parsers against perimeter dataset")
 
     args = parser.parse_args()
-    if args.command == "parse":
+    if args.command == "test":
+        cmd_test(args)
+    elif args.command == "parse":
         cmd_parse(args)
     elif args.command == "serve":
         cmd_serve(args)
