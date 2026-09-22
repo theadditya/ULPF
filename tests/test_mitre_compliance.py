@@ -43,17 +43,32 @@ def test_multi_schema_exporter(pipeline):
     log = '<166>Sep 22 18:01:05 firewall-edge-01 %ASA-6-302013: Built outbound TCP connection 987654 for outside:198.51.100.20/443 (198.51.100.20/443) to inside:192.168.1.100/54321 (192.168.1.100/54321)'
     event = pipeline.process_event(log)
     
-    # Export to Wazuh JSON
-    wazuh_alert = MultiSchemaExporter.to_wazuh_format(event, risk_score=35)
-    assert "rule" in wazuh_alert
-    assert "data" in wazuh_alert
-    assert wazuh_alert["data"]["srcip"] == "192.168.1.100"
-    assert wazuh_alert["data"]["dstip"] == "198.51.100.20"
-    assert wazuh_alert["data"]["action"] == "Allowed"
+    # Export to Unified SIEM JSON
+    siem_alert = MultiSchemaExporter.to_siem_format(event, risk_score=35)
+    assert "rule" in siem_alert
+    assert "data" in siem_alert
+    assert siem_alert["data"]["srcip"] == "192.168.1.100"
+    assert siem_alert["data"]["dstip"] == "198.51.100.20"
+    assert siem_alert["data"]["action"] == "Allowed"
     
+    # Backward compatible alias check
+    wazuh_alert = MultiSchemaExporter.to_wazuh_format(event, risk_score=35)
+    assert wazuh_alert["data"]["srcip"] == "192.168.1.100"
+
     # Export to Elastic Common Schema (ECS)
     ecs_event = MultiSchemaExporter.to_ecs_format(event)
     assert "ecs" in ecs_event
     assert ecs_event["source"]["ip"] == "192.168.1.100"
     assert ecs_event["destination"]["ip"] == "198.51.100.20"
     assert ecs_event["network"]["transport"] == "tcp"
+
+    # Export to Forensic Bundle & Traceability
+    bundle = MultiSchemaExporter.to_forensic_bundle(event)
+    assert "forensic_record" in bundle
+    assert bundle["forensic_record"]["integrity_verified"] is True
+    assert "verbatim_raw_payload" in bundle
+
+    trace = MultiSchemaExporter.build_traceability(event)
+    assert len(trace) >= 6
+    assert any("src_endpoint.ip" in t["canonical_field"] for t in trace)
+

@@ -1,7 +1,7 @@
 /* ==========================================================================
-   ULPF Modern Security Hub Design System
-   Inspired by Wazuh XDR/SIEM, Cloudflare, and Linear
-   Full Light & Dark Theme Support • Air-Gapped & Public Web Ready
+   ULPF Cybersecurity Operations Dashboard Styling
+   Modern Enterprise SIEM/XDR & Cloud Platform UI Design
+   Dual Theme (Dark / Light) with Accessible WCAG AAA Contrast
    ========================================================================== */
 
 :root, [data-theme="dark"] {
@@ -137,7 +137,7 @@ body {
     color: var(--text-primary);
 }
 
-.wazuh-pill {
+.tech-pill {
     font-size: 0.72rem;
     font-weight: 700;
     background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(6, 182, 212, 0.2));
@@ -222,8 +222,8 @@ body {
 [data-theme="light"] .sun-icon { display: none; }
 [data-theme="light"] .moon-icon { display: block; }
 
-/* Sub-Bar (Wazuh Inspired) */
-.wazuh-subbar {
+/* Sub-Bar */
+.sub-bar {
     background-color: var(--bg-subtle);
     border-bottom: 1px solid var(--border-color);
     padding: 0.55rem 2rem;
@@ -518,16 +518,16 @@ textarea#raw-log-input:focus {
 }
 
 /* ==========================================================================
-   Wazuh-Inspired Tabs Navigation
+   Modern Tabs Navigation
    ========================================================================== */
-.wazuh-tabs {
+.nav-tabs {
     display: flex;
     background-color: var(--bg-subtle);
     border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
 }
 
-.wazuh-tab {
+.nav-tab {
     background: transparent;
     border: none;
     padding: 0.75rem 0.95rem;
@@ -543,9 +543,9 @@ textarea#raw-log-input:focus {
     transition: all 0.15s;
 }
 
-.wazuh-tab:hover { color: var(--text-primary); }
+.nav-tab:hover { color: var(--text-primary); }
 
-.wazuh-tab.active {
+.nav-tab.active {
     color: var(--cyan);
     border-bottom-color: var(--cyan);
     background-color: var(--bg-surface);
@@ -753,7 +753,7 @@ textarea#raw-log-input:focus {
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 
 /* ==========================================================================
-   Tab 2: 3-Phase Transformation Timeline Stepper (Wazuh Logtest)
+   Tab 2: 3-Phase Transformation Pipeline Stepper
    ========================================================================== */
 .timeline-stepper {
     display: flex;
@@ -905,13 +905,15 @@ textarea#raw-log-input:focus {
 .comp-badge strong { color: var(--cyan); }
 
 /* ==========================================================================
-   Tab 4: Multi-Schema Toggle (OCSF, Wazuh, ECS)
+   Tab 4: Multi-Schema Toggle (OCSF, SIEM, ECS, Forensic)
    ========================================================================== */
 .schema-toggle-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .schema-btn-group {
@@ -939,6 +941,17 @@ textarea#raw-log-input:focus {
     color: #ffffff;
 }
 
+.schema-meta-tag {
+    font-size: 0.75rem;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+}
+
+.terminal-wrapper {
+    position: relative;
+}
+
 .code-terminal {
     background-color: var(--code-bg);
     border-radius: 10px;
@@ -957,43 +970,199 @@ textarea#raw-log-input:focus {
 }
 
 /* ==========================================================================
-   Tab 5: AI/ML Feature Vector Cards
+   Tab 5: AI/ML Feature Vector (26 Dimensions Structured)
    ========================================================================== */
-.ml-grid-layout {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+.ml-header-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
     gap: 0.5rem;
+}
+
+.ml-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.ml-status-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+}
+
+.ml-action-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.ml-category-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
     margin-bottom: 1rem;
 }
 
-.ml-metric-pill {
+.ml-cat-box {
     background-color: var(--bg-subtle);
     border: 1px solid var(--border-color);
-    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    padding: 0.75rem 0.85rem;
+}
+
+.ml-cat-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.ml-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+}
+
+.ml-metric-pill {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.65rem;
     border-radius: 6px;
     display: flex;
     justify-content: space-between;
-    font-size: 0.75rem;
+    align-items: center;
+    font-size: 0.73rem;
 }
 
-.ml-k { color: var(--text-secondary); }
-.ml-v { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--cyan); }
+.ml-val-active {
+    border-color: var(--cyan);
+    background-color: rgba(6, 182, 212, 0.08);
+}
 
-.unmapped-banner {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    background-color: var(--bg-elevated);
-    border: 1px solid var(--border-color);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
+.ml-k {
     color: var(--text-secondary);
-    margin-bottom: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+}
+
+.ml-v {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--cyan);
+}
+
+.ml-vector-output-wrap {
+    margin-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.85rem;
+}
+
+.ml-vector-output-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
 }
 
 /* ==========================================================================
-   Bottom Stream Table
+   Tab 6: 0% Loss Unmapped Retention & Traceability
+   ========================================================================== */
+.audit-summary-box {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.15rem;
+}
+
+.audit-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.audit-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.audit-val {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.forensic-subcard {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.forensic-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.forensic-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.forensic-tag {
+    font-size: 0.7rem;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.forensic-explainer {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.trace-target {
+    color: var(--success);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.trace-rule {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+/* ==========================================================================
+   Data Tables
    ========================================================================== */
 .stream-card {
     margin: 0 2rem 2rem 2rem;
@@ -1025,13 +1194,13 @@ input#stream-search:focus {
     overflow-y: auto;
 }
 
-.wazuh-table {
+.data-table, .wazuh-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.8rem;
 }
 
-.wazuh-table th {
+.data-table th, .wazuh-table th {
     background-color: var(--bg-subtle);
     color: var(--text-muted);
     font-weight: 700;
@@ -1046,14 +1215,14 @@ input#stream-search:focus {
     z-index: 10;
 }
 
-.wazuh-table td {
+.data-table td, .wazuh-table td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-secondary);
     font-family: 'JetBrains Mono', monospace;
 }
 
-.wazuh-table tr:hover td {
+.data-table tr:hover td, .wazuh-table tr:hover td {
     background-color: var(--bg-subtle);
 }
 

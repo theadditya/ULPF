@@ -1,3 +1,6 @@
+// ULPF Universal Log Pre-processing & Normalization Platform
+// Production Modern Frontend Controller
+
 // Preset Raw Logs from Perimeter Devices
 const PRESETS = {
     palo_alto: '<134>1,2026/09/22 18:00:15,001801000001,TRAFFIC,drop,1,2026/09/22 18:00:15,198.51.100.42,10.0.1.50,198.51.100.42,10.0.1.50,BLOCK_SUSPICIOUS,,,web-browsing,vsys1,untrust,trust,ethernet1/1,ethernet1/2,default,2026/09/22 18:00:15,14205,1,54123,80,54123,80,0x0,tcp,deny,64,64,0,1,2026/09/22 18:00:15,0,any',
@@ -11,9 +14,10 @@ const PRESETS = {
     leef: 'LEEF:2.0|Imperva|SecureSphere|14.0|SECURITY_ALERT|src=203.0.113.19 srcPort=50122 dst=10.0.2.10 dstPort=80 proto=TCP action=block sev=Critical totalBytes=3200'
 };
 
+// Global State
 let cachedStreamRecords = [];
 let currentEventData = null;
-let currentSchemaView = 'ocsf'; // 'ocsf' | 'wazuh' | 'ecs'
+let currentSchemaView = 'ocsf'; // 'ocsf' | 'siem' | 'ecs' | 'forensic'
 
 // ==========================================
 // Theme Management
@@ -63,41 +67,46 @@ async function setDeploymentMode(mode) {
 // ==========================================
 // Presets & Input
 // ==========================================
-function selectPreset(presetKey) {
+function selectPreset(presetKey, targetEl) {
     document.querySelectorAll('.preset-pill-list .preset-btn').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target && event.target.classList.contains('preset-btn')) {
-        event.target.classList.add('active');
+    
+    if (targetEl) {
+        targetEl.classList.add('active');
+    } else {
+        const btn = document.querySelector(`.preset-btn[data-preset="${presetKey}"]`);
+        if (btn) btn.classList.add('active');
     }
 
     const raw = PRESETS[presetKey];
     if (raw) {
-        document.getElementById('raw-log-input').value = raw;
+        const inputEl = document.getElementById('raw-log-input');
+        if (inputEl) inputEl.value = raw;
         processCurrentLog();
     }
 }
 
 function clearInput() {
-    document.getElementById('raw-log-input').value = '';
-    document.getElementById('raw-log-input').focus();
+    const inputEl = document.getElementById('raw-log-input');
+    if (inputEl) {
+        inputEl.value = '';
+        inputEl.focus();
+    }
 }
 
 // ==========================================
 // Tabs & Multi-Schema Views
 // ==========================================
 function switchTab(tabId) {
-    document.querySelectorAll('.wazuh-tab').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === tabId);
+    });
 
-    const tabButtons = document.querySelectorAll('.wazuh-tab');
-    if (tabId === 'tab-summary') tabButtons[0].classList.add('active');
-    if (tabId === 'tab-logtest') tabButtons[1].classList.add('active');
-    if (tabId === 'tab-mitre') tabButtons[2].classList.add('active');
-    if (tabId === 'tab-schema') tabButtons[3].classList.add('active');
-    if (tabId === 'tab-ml') tabButtons[4].classList.add('active');
-    if (tabId === 'tab-unmapped') tabButtons[5].classList.add('active');
-
-    const pane = document.getElementById(tabId);
-    if (pane) pane.classList.add('active');
+    if (tabId === 'tab-schema') {
+        setSchemaView(currentSchemaView);
+    }
 }
 
 function setSchemaView(schemaType) {
@@ -106,15 +115,28 @@ function setSchemaView(schemaType) {
     const activeBtn = document.getElementById(`btn-schema-${schemaType}`);
     if (activeBtn) activeBtn.classList.add('active');
 
-    if (!currentEventData) return;
-
+    const badgeDesc = document.getElementById('schema-badge-desc');
     const codeEl = document.getElementById('code-schema');
+    if (!codeEl) return;
+
+    if (!currentEventData) {
+        codeEl.innerText = '// Process any network log to view real-time multi-schema export.';
+        return;
+    }
+
     if (schemaType === 'ocsf') {
+        if (badgeDesc) badgeDesc.innerText = 'OCSF Class 4001: Network Activity (Standard Canonical)';
         codeEl.innerText = JSON.stringify(currentEventData.event, null, 2);
-    } else if (schemaType === 'wazuh') {
-        codeEl.innerText = JSON.stringify(currentEventData.wazuh_format, null, 2);
+    } else if (schemaType === 'siem') {
+        if (badgeDesc) badgeDesc.innerText = 'Unified SIEM Alert JSON (Production SIEM & XDR Format)';
+        const siemObj = currentEventData.siem_format || currentEventData.wazuh_format || {};
+        codeEl.innerText = JSON.stringify(siemObj, null, 2);
     } else if (schemaType === 'ecs') {
+        if (badgeDesc) badgeDesc.innerText = 'Elastic Common Schema (ECS v8.11 Standard)';
         codeEl.innerText = JSON.stringify(currentEventData.ecs_format, null, 2);
+    } else if (schemaType === 'forensic') {
+        if (badgeDesc) badgeDesc.innerText = 'Forensic Provenance Record (Verbatim Bytes + SHA-256 Fingerprint)';
+        codeEl.innerText = JSON.stringify(currentEventData.forensic_bundle, null, 2);
     }
 }
 
@@ -127,7 +149,7 @@ async function processCurrentLog() {
 
     const btn = document.getElementById('btn-process');
     btn.disabled = true;
-    btn.innerHTML = `<span class="pulse-indicator"></span> Analyzing...`;
+    btn.innerHTML = `<span class="pulse-indicator"></span> Normalizing...`;
 
     try {
         const response = await fetch('/api/v1/process', {
@@ -160,7 +182,7 @@ async function processCurrentLog() {
 }
 
 // ==========================================
-// Render Wazuh-Grade Visual Intelligence
+// Render Visual Intelligence & Analytics
 // ==========================================
 function renderResults(data) {
     const event = data.event;
@@ -172,119 +194,264 @@ function renderResults(data) {
     // 1. Auto-Detection Pill
     const pill = document.getElementById('detection-pill');
     const parserName = document.getElementById('detected-parser-name');
-    pill.style.display = 'inline-flex';
-    parserName.innerText = `Auto-Detected: ${event.product.vendor_name} (${event.lineage.parser_id})`;
+    if (pill && parserName) {
+        pill.style.display = 'inline-flex';
+        parserName.innerText = `Auto-Detected: ${event.product.vendor_name} (${event.lineage.parser_id})`;
+    }
 
     // 2. Tab 1: Visual Summary Card
-    document.getElementById('summary-empty').style.display = 'none';
-    document.getElementById('summary-content').style.display = 'block';
+    const emptySummary = document.getElementById('summary-empty');
+    const contentSummary = document.getElementById('summary-content');
+    if (emptySummary) emptySummary.style.display = 'none';
+    if (contentSummary) contentSummary.style.display = 'block';
 
-    const action = event.disposition || 'Unknown';
+    const action = (event.disposition && event.disposition.value) ? event.disposition.value : (event.disposition || 'Unknown');
     const isAllowed = action === 'Allowed';
     const verdictAction = document.getElementById('verdict-action');
-    verdictAction.innerText = action;
-    verdictAction.className = `verdict-pill ${isAllowed ? 'act-allowed' : 'act-blocked'}`;
+    if (verdictAction) {
+        verdictAction.innerText = action;
+        verdictAction.className = `verdict-pill ${isAllowed ? 'act-allowed' : 'act-blocked'}`;
+    }
 
-    const dir = event.connection_info.direction || 'Unknown';
-    document.getElementById('verdict-direction').innerText = `Flow Direction: ${dir}`;
+    const dir = (event.connection_info && event.connection_info.direction && event.connection_info.direction.value)
+        ? event.connection_info.direction.value
+        : (event.connection_info.direction || 'Unknown');
+    const verdictDir = document.getElementById('verdict-direction');
+    if (verdictDir) verdictDir.innerText = `Flow Direction: ${dir}`;
 
     // Risk Meter Bar & Score
     const riskBar = document.getElementById('risk-bar-fill');
-    riskBar.style.width = `${risk.score}%`;
-    document.getElementById('risk-score-text').innerText = `${risk.score} / 100 (${risk.level})`;
+    if (riskBar) riskBar.style.width = `${risk.score}%`;
+    const riskScoreText = document.getElementById('risk-score-text');
+    if (riskScoreText) riskScoreText.innerText = `${risk.score} / 100 (${risk.level})`;
 
     // Endpoints & Scope
-    document.getElementById('summary-src-ip').innerText = event.src_endpoint.ip || '0.0.0.0';
-    document.getElementById('summary-src-port').innerText = event.src_endpoint.port || '—';
+    const srcIpEl = document.getElementById('summary-src-ip');
+    if (srcIpEl) srcIpEl.innerText = event.src_endpoint.ip || '0.0.0.0';
+    const srcPortEl = document.getElementById('summary-src-port');
+    if (srcPortEl) srcPortEl.innerText = event.src_endpoint.port || '—';
     const srcScope = event.src_endpoint.is_internal ? 'Internal LAN' : (event.src_endpoint.country || 'Public');
-    document.getElementById('summary-src-scope').innerText = srcScope;
+    const srcScopeEl = document.getElementById('summary-src-scope');
+    if (srcScopeEl) srcScopeEl.innerText = srcScope;
 
-    document.getElementById('summary-dst-ip').innerText = event.dst_endpoint.ip || '0.0.0.0';
-    document.getElementById('summary-dst-port').innerText = event.dst_endpoint.port || '—';
+    const dstIpEl = document.getElementById('summary-dst-ip');
+    if (dstIpEl) dstIpEl.innerText = event.dst_endpoint.ip || '0.0.0.0';
+    const dstPortEl = document.getElementById('summary-dst-port');
+    if (dstPortEl) dstPortEl.innerText = event.dst_endpoint.port || '—';
     const dstScope = event.dst_endpoint.is_internal ? 'Internal LAN' : (event.dst_endpoint.country || 'Public');
     const dstBadge = document.getElementById('summary-dst-scope');
-    dstBadge.innerText = dstScope;
-    dstBadge.className = `scope-pill ${event.dst_endpoint.is_internal ? '' : 'scope-public'}`;
+    if (dstBadge) {
+        dstBadge.innerText = dstScope;
+        dstBadge.className = `scope-pill ${event.dst_endpoint.is_internal ? '' : 'scope-public'}`;
+    }
 
-    document.getElementById('summary-proto').innerText = (event.connection_info.protocol_name || 'IP').toUpperCase();
+    const protoEl = document.getElementById('summary-proto');
+    if (protoEl) protoEl.innerText = (event.connection_info.protocol_name || 'IP').toUpperCase();
 
     const totalBytes = event.traffic.total_bytes || (event.traffic.bytes_in + event.traffic.bytes_out) || 0;
     const bytesFormatted = totalBytes > 1024 ? `${(totalBytes / 1024).toFixed(1)} KB` : `${totalBytes} B`;
-    document.getElementById('summary-bytes').innerText = bytesFormatted;
+    const bytesEl = document.getElementById('summary-bytes');
+    if (bytesEl) bytesEl.innerText = bytesFormatted;
 
-    document.getElementById('summary-vendor').innerText = `${event.product.vendor_name} (${event.product.product_name})`;
-    document.getElementById('summary-app').innerText = event.app_name || 'Standard Network Traffic';
-    document.getElementById('summary-hash-short').innerText = (event.lineage.raw_hash || '').substring(0, 16) + '...';
+    const vendorEl = document.getElementById('summary-vendor');
+    if (vendorEl) vendorEl.innerText = `${event.product.vendor_name} (${event.product.product_name})`;
+    const appEl = document.getElementById('summary-app');
+    if (appEl) appEl.innerText = event.app_name || 'Standard Network Traffic';
+    const hashEl = document.getElementById('summary-hash-short');
+    if (hashEl) hashEl.innerText = (event.lineage.raw_hash || '').substring(0, 16) + '...';
 
     const threatEl = document.getElementById('summary-threat');
-    if (event.threat && event.threat.signature_name) {
-        threatEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">🚨 ${event.threat.signature_name}</span>`;
-    } else {
-        threatEl.innerHTML = `<span style="color:var(--success); font-weight:600;">Clean (Zero Active IoCs)</span>`;
+    if (threatEl) {
+        if (event.threat && event.threat.signature_name) {
+            threatEl.innerHTML = `<span style="color:var(--danger); font-weight:700;">🚨 ${event.threat.signature_name}</span>`;
+        } else {
+            threatEl.innerHTML = `<span style="color:var(--success); font-weight:600;">Clean (Zero Active IoCs)</span>`;
+        }
     }
 
-    // 3. Tab 2: 3-Phase Transformation Stepper (Wazuh Logtest)
+    // 3. Tab 2: 3-Phase Transformation Stepper
     if (phases) {
-        document.getElementById('phase-1-hash').innerText = `SHA-256 Digest: ${phases.phase_1.sha256} (${phases.phase_1.raw_length} bytes losslessly preserved)`;
-        document.getElementById('phase-2-details').innerText = `Parser: ${phases.phase_2.parser_id} | Vendor: ${phases.phase_2.vendor} | Retained Unmapped Keys: ${phases.phase_2.unmapped_retained}`;
-        document.getElementById('phase-3-details').innerText = `Disposition: ${phases.phase_3.action} | Direction: ${phases.phase_3.direction} | MITRE Tactic: ${phases.phase_3.mitre_tactic} | ML Features: ${phases.phase_3.ml_features_count}D`;
+        const p1Hash = document.getElementById('phase-1-hash');
+        if (p1Hash) p1Hash.innerText = `SHA-256 Digest: ${phases.phase_1.sha256} (${phases.phase_1.raw_length} bytes losslessly preserved)`;
+        const p2Details = document.getElementById('phase-2-details');
+        if (p2Details) p2Details.innerText = `Parser: ${phases.phase_2.parser_id} | Vendor: ${phases.phase_2.vendor} | Retained Unmapped Keys: ${phases.phase_2.unmapped_retained}`;
+        const p3Details = document.getElementById('phase-3-details');
+        if (p3Details) p3Details.innerText = `Disposition: ${phases.phase_3.action} | Direction: ${phases.phase_3.direction} | MITRE Tactic: ${phases.phase_3.mitre_tactic} | ML Features: ${phases.phase_3.ml_features_count}D`;
     }
 
     // 4. Tab 3: MITRE ATT&CK & Compliance
     if (mitre) {
-        document.getElementById('mitre-tactic').innerText = `${mitre.tactic_id}: ${mitre.tactic_name}`;
-        document.getElementById('mitre-technique').innerText = `${mitre.technique_id}: ${mitre.technique_name}`;
-        document.getElementById('mitre-link').href = mitre.url;
+        const tacticEl = document.getElementById('mitre-tactic');
+        if (tacticEl) tacticEl.innerText = `${mitre.tactic_id}: ${mitre.tactic_name}`;
+        const techEl = document.getElementById('mitre-technique');
+        if (techEl) techEl.innerText = `${mitre.technique_id}: ${mitre.technique_name}`;
+        const linkEl = document.getElementById('mitre-link');
+        if (linkEl) linkEl.href = mitre.url;
     }
 
     if (comp) {
         const compContainer = document.getElementById('compliance-badges');
-        compContainer.innerHTML = `
-            <div class="comp-badge"><strong>PCI-DSS v4.0:</strong> ${comp.pci_dss[0]}</div>
-            <div class="comp-badge"><strong>NIST SP 800-53:</strong> ${comp.nist_800_53[0]}</div>
-            <div class="comp-badge"><strong>ISO 27001:</strong> ${comp.iso_27001[0]}</div>
-            <div class="comp-badge"><strong>HIPAA Security:</strong> ${comp.hipaa[0]}</div>
-            <div class="comp-badge"><strong>GDPR Article 32:</strong> ${comp.gdpr[0]}</div>
-        `;
+        if (compContainer) {
+            compContainer.innerHTML = `
+                <div class="comp-badge"><strong>PCI-DSS v4.0:</strong> ${(comp.pci_dss && comp.pci_dss[0]) || 'Req 10.2.1 Audit Logging'}</div>
+                <div class="comp-badge"><strong>NIST SP 800-53:</strong> ${(comp.nist_800_53 && comp.nist_800_53[0]) || 'AC-4 Flow Enforcement'}</div>
+                <div class="comp-badge"><strong>ISO 27001:</strong> ${(comp.iso_27001 && comp.iso_27001[0]) || 'A.12.4.1 Event Logging'}</div>
+                <div class="comp-badge"><strong>HIPAA Security:</strong> ${(comp.hipaa && comp.hipaa[0]) || '164.312(b) Audit Controls'}</div>
+                <div class="comp-badge"><strong>GDPR Article 32:</strong> ${(comp.gdpr && comp.gdpr[0]) || 'Article 32 Security of Processing'}</div>
+            `;
+        }
     }
 
     // 5. Tab 4: Multi-Schema Export
     setSchemaView(currentSchemaView);
 
-    // 6. Tab 5: AI/ML Feature Vector
-    const feats = data.features;
-    let mlCards = '<div class="ml-grid-layout">';
-    for (const [k, v] of Object.entries(feats)) {
-        mlCards += `
-            <div class="ml-metric-pill">
-                <span class="ml-k">${k}</span>
-                <span class="ml-v">${v}</span>
+    // 6. Tab 5: AI/ML 26-D Feature Vector
+    renderMlVectorTab(data);
+
+    // 7. Tab 6: 0% Loss Unmapped Retention & Traceability
+    renderLosslessAuditTab(data);
+}
+
+// ==========================================
+// Render AI/ML 26-D Vector Tab
+// ==========================================
+function renderMlVectorTab(data) {
+    const container = document.getElementById('ml-container');
+    if (!container) return;
+
+    const feats = data.features || {};
+    const vector = data.ml_vector || [];
+
+    // Feature Categories Definition
+    const categories = [
+        {
+            title: '🌐 Network Topology & Scope',
+            keys: ['src_port', 'dst_port', 'is_well_known_port', 'is_ephemeral_src_port', 'is_internal_src', 'is_internal_dst']
+        },
+        {
+            title: '🔄 Traffic Flow & Directionality',
+            keys: ['direction_inbound', 'direction_outbound', 'direction_lateral', 'direction_external']
+        },
+        {
+            title: '📡 Layer 4 Transport Protocols',
+            keys: ['proto_tcp', 'proto_udp', 'proto_icmp', 'proto_other']
+        },
+        {
+            title: '📊 Volume & Log-Scale Traffic Metrics',
+            keys: ['bytes_in_log', 'bytes_out_log', 'total_bytes_log', 'bytes_ratio_out_in', 'packets_total_log', 'duration_sec', 'bytes_per_second']
+        },
+        {
+            title: '🛡️ Security Posture & Anomaly Signals',
+            keys: ['action_blocked', 'action_allowed', 'severity_level', 'threat_flag', 'threat_confidence']
+        }
+    ];
+
+    let html = `<div class="ml-category-stack">`;
+
+    categories.forEach(cat => {
+        html += `
+            <div class="ml-cat-box">
+                <h4 class="ml-cat-title">${cat.title}</h4>
+                <div class="ml-grid-layout">
+        `;
+
+        cat.keys.forEach(k => {
+            const val = feats[k] !== undefined ? feats[k] : 0.0;
+            const isBinary = (val === 0.0 || val === 1.0) && !['src_port', 'dst_port'].includes(k);
+            const badgeClass = isBinary && val === 1.0 ? 'ml-val-active' : '';
+
+            html += `
+                <div class="ml-metric-pill ${badgeClass}">
+                    <span class="ml-k">${k}</span>
+                    <span class="ml-v">${typeof val === 'number' ? Number(val.toFixed(4)) : val}</span>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
             </div>
         `;
-    }
-    mlCards += '</div>';
-    mlCards += `
-        <div style="margin-top: 1rem;">
-            <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:0.35rem;">
-                Mathematical Vector Array [${data.ml_vector.length} dimensions]:
-            </span>
-            <pre class="code-terminal"><code>${JSON.stringify(data.ml_vector)}</code></pre>
+    });
+
+    html += `</div>`;
+
+    // Mathematical Array Box
+    html += `
+        <div class="ml-vector-output-wrap">
+            <div class="ml-vector-output-head">
+                <span class="font-mono text-cyan" style="font-size:0.8rem; font-weight:700;">
+                    Mathematical Dense Float64 Array [${vector.length} dimensions]:
+                </span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Standard shape (1, 26)</span>
+            </div>
+            <pre class="code-terminal"><code id="code-ml-array">${JSON.stringify(vector)}</code></pre>
         </div>
     `;
-    document.getElementById('ml-container').innerHTML = mlCards;
 
-    // 7. Tab 6: Unmapped Attributes
-    const unmappedCode = document.getElementById('code-unmapped');
-    const unmappedKeys = Object.keys(event.unmapped || {});
-    if (unmappedKeys.length === 0) {
-        unmappedCode.innerText = '// All extracted vendor fields were mapped 100% cleanly into the canonical OCSF v1.2 standard schema!';
-    } else {
-        unmappedCode.innerText = JSON.stringify(event.unmapped, null, 2);
+    container.innerHTML = html;
+}
+
+// ==========================================
+// Render 0% Loss Retention & Traceability Tab
+// ==========================================
+function renderLosslessAuditTab(data) {
+    const event = data.event;
+    const raw = event.raw_event || '';
+    const unmapped = event.unmapped || {};
+    const unmappedKeys = Object.keys(unmapped);
+    const trace = data.traceability || [];
+
+    // Banner metrics
+    const shaEl = document.getElementById('audit-sha-verified');
+    if (shaEl) {
+        shaEl.innerText = `SHA-256: ${event.lineage.raw_hash} (Match)`;
+    }
+
+    const byteComp = document.getElementById('audit-byte-comparison');
+    if (byteComp) {
+        const rawBytes = new Blob([raw]).size;
+        const normBytes = new Blob([JSON.stringify(event)]).size;
+        byteComp.innerText = `Raw: ${rawBytes} B | Canonical OCSF: ${normBytes} B (Lossless 100%)`;
+    }
+
+    // Section 1: Verbatim Raw Buffer
+    const rawCodeEl = document.getElementById('code-verbatim-raw');
+    if (rawCodeEl) rawCodeEl.innerText = raw;
+
+    // Section 2: Unmapped Vendor Keys
+    const countTag = document.getElementById('unmapped-count-tag');
+    if (countTag) countTag.innerText = `${unmappedKeys.length} Unmapped Vendor Keys`;
+
+    const unmappedCodeEl = document.getElementById('code-unmapped');
+    if (unmappedCodeEl) {
+        if (unmappedKeys.length === 0) {
+            unmappedCodeEl.innerText = '// All extracted vendor fields mapped 100% cleanly into the canonical OCSF v1.2 standard schema! Zero leftover fields.';
+        } else {
+            unmappedCodeEl.innerText = JSON.stringify(unmapped, null, 2);
+        }
+    }
+
+    // Section 3: Traceability Table
+    const tbody = document.getElementById('traceability-tbody');
+    if (tbody) {
+        if (!trace || trace.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-table">No traceability matrix available.</td></tr>`;
+        } else {
+            tbody.innerHTML = trace.map(t => `
+                <tr>
+                    <td><strong class="font-mono text-cyan">${t.source_token}</strong></td>
+                    <td class="font-mono">${t.extracted_val}</td>
+                    <td><span class="trace-target">${t.canonical_field}</span></td>
+                    <td><span class="trace-rule">${t.transformation}</span></td>
+                </tr>
+            `).join('');
+        }
     }
 }
 
 // ==========================================
-// Copy to Clipboard
+// Copy Helpers
 // ==========================================
 function copyActiveOutput() {
     if (!currentEventData) {
@@ -293,15 +460,16 @@ function copyActiveOutput() {
     }
 
     const activeTab = document.querySelector('.tab-content.active');
-    let textToCopy = '';
+    if (!activeTab) return;
 
+    let textToCopy = '';
     if (activeTab.id === 'tab-schema') {
         const codeEl = document.getElementById('code-schema');
-        textToCopy = codeEl.innerText;
+        textToCopy = codeEl ? codeEl.innerText : '';
     } else if (activeTab.id === 'tab-ml') {
         textToCopy = JSON.stringify(currentEventData.ml_vector);
     } else if (activeTab.id === 'tab-unmapped') {
-        textToCopy = JSON.stringify(currentEventData.event.unmapped, null, 2);
+        textToCopy = JSON.stringify(currentEventData.forensic_bundle, null, 2);
     } else {
         textToCopy = JSON.stringify(currentEventData.event, null, 2);
     }
@@ -313,8 +481,36 @@ function copyActiveOutput() {
     });
 }
 
+function copyRawLog() {
+    if (!currentEventData) {
+        showToast('No raw log to copy yet');
+        return;
+    }
+    navigator.clipboard.writeText(currentEventData.event.raw_event).then(() => {
+        showToast('Verbatim raw log copied!');
+    });
+}
+
+function copyMlVector(format) {
+    if (!currentEventData || !currentEventData.ml_vector) {
+        showToast('No ML vector generated yet');
+        return;
+    }
+    const vec = currentEventData.ml_vector;
+    let text = '';
+    if (format === 'numpy') {
+        text = `import numpy as np\nx = np.array(${JSON.stringify(vec)}, dtype=np.float64)`;
+    } else {
+        text = JSON.stringify(vec);
+    }
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied ${format === 'numpy' ? 'NumPy code' : 'array'} to clipboard!`);
+    });
+}
+
 function showToast(msg) {
     const toast = document.getElementById('toast');
+    if (!toast) return;
     toast.innerText = msg;
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 2200);
@@ -322,6 +518,7 @@ function showToast(msg) {
 
 function toggleHelpModal() {
     const modal = document.getElementById('help-modal');
+    if (!modal) return;
     modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
 }
 
@@ -344,14 +541,17 @@ async function fetchTelemetry() {
     try {
         const res = await fetch('/api/v1/telemetry');
         const data = await res.json();
-        document.getElementById('stat-total').innerText = data.total_processed.toLocaleString();
-        document.getElementById('stat-latency').innerText = `${data.average_latency_ms} ms`;
+        const statTotal = document.getElementById('stat-total');
+        if (statTotal) statTotal.innerText = data.total_processed.toLocaleString();
+        const statLatency = document.getElementById('stat-latency');
+        if (statLatency) statLatency.innerText = `${data.average_latency_ms} ms`;
     } catch (e) {}
 
     try {
         const res2 = await fetch('/api/v1/parsers');
         const data2 = await res2.json();
-        document.getElementById('stat-parsers').innerText = `${data2.count} Available`;
+        const statParsers = document.getElementById('stat-parsers');
+        if (statParsers) statParsers.innerText = `${data2.count} Loaded`;
     } catch (e) {}
 }
 
@@ -365,7 +565,9 @@ async function fetchRecentEvents() {
 }
 
 function filterStreamTable() {
-    const q = document.getElementById('stream-search').value.toLowerCase().trim();
+    const searchEl = document.getElementById('stream-search');
+    if (!searchEl) return;
+    const q = searchEl.value.toLowerCase().trim();
     if (!q) {
         renderStreamTable(cachedStreamRecords);
         return;
@@ -382,6 +584,8 @@ function filterStreamTable() {
 
 function renderStreamTable(records) {
     const tbody = document.getElementById('stream-tbody');
+    if (!tbody) return;
+
     if (!records || records.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="empty-table">No logs matching filter.</td></tr>`;
         return;

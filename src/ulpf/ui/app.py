@@ -103,12 +103,14 @@ async def process_single_log(req: LogProcessRequest):
     features = MLFeatureExtractor.extract_features(event)
     vector = MLFeatureExtractor.to_vector(event)
     
-    # Wazuh-inspired Intelligence & Compliance Engine
+    # Security Intelligence & Regulatory Compliance Engine
     mitre, compliance, risk = SecurityIntelligenceEngine.evaluate(event)
-    wazuh_format = MultiSchemaExporter.to_wazuh_format(event, risk.score)
+    siem_format = MultiSchemaExporter.to_siem_format(event, risk.score)
     ecs_format = MultiSchemaExporter.to_ecs_format(event)
+    forensic_bundle = MultiSchemaExporter.to_forensic_bundle(event)
+    traceability = MultiSchemaExporter.build_traceability(event)
 
-    # 3-Phase Wazuh Logtest-inspired Transformation Trace
+    # 3-Phase Transformation Execution Trace
     phases = {
         "phase_1": {
             "title": "Phase 1: Ingestion & Integrity Hash",
@@ -125,7 +127,7 @@ async def process_single_log(req: LogProcessRequest):
             "unmapped_retained": len(event.unmapped)
         },
         "phase_3": {
-            "title": "Phase 3: OCSF v1.2 Normalization & Intelligence",
+            "title": "Phase 3: Canonical Normalization & Intelligence",
             "description": "Attributes mapped to canonical OCSF Network Activity (Class 4001), MITRE ATT&CK, and 26-D ML vectors.",
             "action": event.disposition.value,
             "direction": event.connection_info.direction.value,
@@ -145,8 +147,11 @@ async def process_single_log(req: LogProcessRequest):
         "compliance": compliance.model_dump(),
         "risk": risk.model_dump(),
         "phases": phases,
-        "wazuh_format": wazuh_format,
+        "siem_format": siem_format,
+        "wazuh_format": siem_format,  # backward compatibility
         "ecs_format": ecs_format,
+        "forensic_bundle": forensic_bundle,
+        "traceability": traceability,
         "deployment_mode": DEPLOYMENT_MODE,
     }
 
