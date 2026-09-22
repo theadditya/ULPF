@@ -67,71 +67,111 @@
         </div>
     </header>
 
-    <!-- Hero Showcase Section (Nixtio-Inspired Minimalist Card) -->
-    <section class="nixtio-hero-section">
-        <div class="nixtio-hero-card">
-            <div class="hero-top-row">
-                <div class="hero-badge-pill">
-                    <span class="hero-pulse-dot"></span>
-                    <span>Universal Log Pre-processing Framework &bull; OCSF v1.2 Standard</span>
+    <!-- Hero Section (Architectural Monochrome Edition) -->
+    <section class="hero-section">
+        <div class="hero-frame">
+            <!-- Top Status Row -->
+            <div class="hero-status-row">
+                <div class="hero-chip">
+                    <span class="chip-dot"></span>
+                    <span class="chip-text">Universal Log Pre-processing Framework &bull; OCSF v1.2 Standard</span>
                 </div>
-                <div class="hero-mode-badge">
-                    <span class="hero-mode-indicator" id="hero-mode-indicator">🔒</span>
+                <div class="hero-enclave-pill" id="hero-enclave-pill">
+                    <span class="pill-dot"></span>
                     <span id="subbar-mode-desc">100% Offline Local Engine (No external API calls, defense enclave mode)</span>
                 </div>
             </div>
 
-            <div class="hero-headline-wrap">
-                <h1 class="hero-headline">Universal Telemetry Normalization for Modern Security Operations.</h1>
-                <p class="hero-subheadline">
-                    Transform raw, heterogeneous perimeter logs into standardized, lossless OCSF Class 4001 events, MITRE ATT&amp;CK context, and 26-D AI/ML feature vectors in sub-millisecond real time.
-                </p>
-            </div>
+            <!-- Two-Column Asymmetric Layout -->
+            <div class="hero-grid">
+                <!-- Left: Typography & Primary Action -->
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Universal Log Telemetry.
+                        <span class="hero-title-accent">Lossless &amp; Analytics-Ready.</span>
+                    </h1>
+                    <p class="hero-description">
+                        Deconstruct, normalize, and stream heterogeneous perimeter device logs into canonical OCSF Class 4001, MITRE ATT&amp;CK context, and 26-D AI/ML feature vectors in sub-millisecond real time.
+                    </p>
 
-            <div class="hero-action-row">
-                <button class="btn btn-primary btn-pill" onclick="loadSampleDataset()">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                    Ingest Perimeter Fleet Samples
-                </button>
-                <div class="hero-tech-pills">
-                    <span class="hero-tech-tag">⚡ Sub-Millisecond Engine</span>
-                    <span class="hero-tech-tag">🛡️ 100% Zero Information Loss</span>
-                    <span class="hero-tech-tag">📦 Apache Parquet + SQLite + JSON-L Sinks</span>
-                </div>
-            </div>
-
-            <!-- Telemetry Stats Grid (Nixtio Minimalist Metric Tiles) -->
-            <div class="hero-stats-grid">
-                <div class="hero-stat-tile">
-                    <div class="hs-metric-row">
-                        <h3 class="stat-number" id="stat-latency">0.12 ms</h3>
-                        <span class="hs-badge hs-badge-green">Median p50</span>
+                    <div class="hero-cta-group">
+                        <button class="btn btn-primary btn-pill hero-cta-btn" onclick="loadSampleDataset()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            <span>Ingest Fleet Telemetry</span>
+                        </button>
+                        <button class="btn btn-outline btn-pill" onclick="toggleHelpModal()">
+                            <span>System Architecture &rarr;</span>
+                        </button>
                     </div>
-                    <span class="hs-label">Ingestion &amp; Normalization Latency</span>
-                </div>
 
-                <div class="hero-stat-tile">
-                    <div class="hs-metric-row">
-                        <h3 class="stat-number text-green" id="stat-integrity">100.0%</h3>
-                        <span class="hs-badge hs-badge-green">SHA-256 Proven</span>
+                    <div class="hero-vendor-strip">
+                        <span class="strip-label">Supported Standards:</span>
+                        <div class="vendor-tags">
+                            <span class="v-tag">Palo Alto PAN-OS</span>
+                            <span class="v-tag">Cisco ASA &amp; IOS</span>
+                            <span class="v-tag">Fortinet FortiOS</span>
+                            <span class="v-tag">Suricata EVE</span>
+                            <span class="v-tag">pfSense</span>
+                            <span class="v-tag">Zeek</span>
+                            <span class="v-tag">CEF / LEEF</span>
+                        </div>
                     </div>
-                    <span class="hs-label">Bit-for-Bit Lossless Retention</span>
-                </div>
-
-                <div class="hero-stat-tile">
-                    <div class="hs-metric-row">
-                        <h3 class="stat-number text-cyan" id="stat-parsers">10 Loaded</h3>
-                        <span class="hs-badge hs-badge-cyan">Zero-Shot Heuristic</span>
-                    </div>
-                    <span class="hs-label">Declarative Perimeter Parsers</span>
                 </div>
 
-                <div class="hero-stat-tile">
-                    <div class="hs-metric-row">
-                        <h3 class="stat-number" id="stat-total">0</h3>
-                        <span class="hs-badge hs-badge-blue">EPS Scalable</span>
+                <!-- Right: Telemetry & Engine Architecture Card -->
+                <div class="hero-telemetry-card">
+                    <div class="htc-header">
+                        <div class="htc-title-wrap">
+                            <span class="htc-live-indicator"></span>
+                            <span class="htc-title">Real-Time Normalization Telemetry</span>
+                        </div>
+                        <span class="htc-status">ACTIVE ENGINE</span>
                     </div>
-                    <span class="hs-label">Total Ingested Events</span>
+
+                    <div class="htc-metrics-grid">
+                        <div class="htc-metric-tile">
+                            <div class="metric-top">
+                                <span class="metric-val" id="stat-latency">0.12 ms</span>
+                                <span class="metric-badge">p50</span>
+                            </div>
+                            <span class="metric-lbl">Processing Latency</span>
+                        </div>
+
+                        <div class="htc-metric-tile">
+                            <div class="metric-top">
+                                <span class="metric-val text-green" id="stat-integrity">100.0%</span>
+                                <span class="metric-badge">SHA-256</span>
+                            </div>
+                            <span class="metric-lbl">Lossless Retention</span>
+                        </div>
+
+                        <div class="htc-metric-tile">
+                            <div class="metric-top">
+                                <span class="metric-val" id="stat-parsers">11 Loaded</span>
+                                <span class="metric-badge">YAML</span>
+                            </div>
+                            <span class="metric-lbl">Active Parsers</span>
+                        </div>
+
+                        <div class="htc-metric-tile">
+                            <div class="metric-top">
+                                <span class="metric-val" id="stat-total">0</span>
+                                <span class="metric-badge">EPS</span>
+                            </div>
+                            <span class="metric-lbl">Total Processed</span>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline Sinks Flow in Hero -->
+                    <div class="htc-sinks-preview">
+                        <span class="sinks-sub">CONCURRENT BIG DATA SINKS:</span>
+                        <div class="sinks-pill-row">
+                            <span class="sp-pill">📦 Apache Parquet</span>
+                            <span class="sp-pill">🗄️ SQLite Forensic DB</span>
+                            <span class="sp-pill">⚡ JSON-L Stream</span>
+                            <span class="sp-pill">🤖 26-D ML Vector</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
