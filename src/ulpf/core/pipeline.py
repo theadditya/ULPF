@@ -36,7 +36,7 @@ class ProcessingPipeline:
     def add_sink(self, sink: BaseSink):
         self.sinks.append(sink)
 
-    def process_event(self, raw_log: str, parser_id: Optional[str] = None) -> UniversalEvent:
+    def process_event(self, raw_log: str, parser_id: Optional[str] = None, deployment_mode: str = "air_gapped") -> UniversalEvent:
         """
         Executes end-to-end processing pipeline for a single raw log event.
         """
@@ -47,13 +47,14 @@ class ProcessingPipeline:
             # 1. Parse & Classify
             extracted, plugin, confidence = self.registry.parse(raw_clean, parser_id)
             
-            # 2. Normalize & Enrich (Lossless retention + Lineage + Offline RFC/GeoIP/Threat)
+            # 2. Normalize & Enrich (Lossless retention + Lineage + Mode-Aware GeoIP/DNS/Threat)
             event = UniversalNormalizer.normalize(
                 raw_log=raw_clean,
                 extracted=extracted,
                 plugin=plugin,
                 confidence=confidence,
-                start_time_perf=t0
+                start_time_perf=t0,
+                deployment_mode=deployment_mode
             )
 
             # 3. Route to Sinks

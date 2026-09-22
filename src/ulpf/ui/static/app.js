@@ -251,12 +251,33 @@ function renderResults(data) {
     const gwMetaEl = document.getElementById('summary-gw-meta');
     if (gwMetaEl) gwMetaEl.innerText = `${protoStr} • ${dir} • ${bytesFormatted}`;
 
+    // Update Enclave Status Pill in narrative
+    const enclavePill = document.getElementById('enclave-status-pill');
+    const isAirGap = (data.enclave_telemetry && data.enclave_telemetry.is_air_gapped !== undefined)
+        ? data.enclave_telemetry.is_air_gapped
+        : (currentDeploymentMode === 'air_gapped');
+
+    if (enclavePill) {
+        if (isAirGap) {
+            enclavePill.className = 'enclave-status-pill mode-airgap';
+            enclavePill.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Air-Gapped Isolated (0 Sockets)`;
+        } else {
+            enclavePill.className = 'enclave-status-pill mode-cloud';
+            enclavePill.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> Public Cloud (Live PTR Active)`;
+        }
+    }
+
     // Endpoints
     const srcIpEl = document.getElementById('summary-src-ip');
     if (srcIpEl) srcIpEl.innerText = event.src_endpoint.ip || '0.0.0.0';
     const srcPortEl = document.getElementById('summary-src-port');
     if (srcPortEl) srcPortEl.innerText = event.src_endpoint.port || '—';
-    const srcScope = event.src_endpoint.is_internal ? 'Internal LAN' : (event.src_endpoint.country || 'Public Internet');
+    let srcScope = event.src_endpoint.is_internal ? 'Internal LAN' : (event.src_endpoint.country || 'Public Internet');
+    if (event.src_endpoint.hostname) {
+        srcScope += ` • ${event.src_endpoint.hostname}`;
+    } else if (isAirGap && !event.src_endpoint.is_internal) {
+        srcScope += ' • DNS Inhibited';
+    }
     const srcScopeEl = document.getElementById('summary-src-scope');
     if (srcScopeEl) srcScopeEl.innerText = srcScope;
 
@@ -264,7 +285,12 @@ function renderResults(data) {
     if (dstIpEl) dstIpEl.innerText = event.dst_endpoint.ip || '0.0.0.0';
     const dstPortEl = document.getElementById('summary-dst-port');
     if (dstPortEl) dstPortEl.innerText = event.dst_endpoint.port || '—';
-    const dstScope = event.dst_endpoint.is_internal ? 'Internal LAN' : (event.dst_endpoint.country || 'Public Internet');
+    let dstScope = event.dst_endpoint.is_internal ? 'Internal Protected LAN' : (event.dst_endpoint.country || 'Public Internet');
+    if (event.dst_endpoint.hostname) {
+        dstScope += ` • ${event.dst_endpoint.hostname}`;
+    } else if (isAirGap && !event.dst_endpoint.is_internal) {
+        dstScope += ' • DNS Inhibited';
+    }
     const dstBadge = document.getElementById('summary-dst-scope');
     if (dstBadge) {
         dstBadge.innerText = dstScope;

@@ -89,9 +89,28 @@ def determine_direction(src_ip: Optional[str], dst_ip: Optional[str]) -> Network
         return NetworkDirection.EXTERNAL
 
 
-def enrich_endpoints(src: EndpointInfo, dst: EndpointInfo) -> NetworkDirection:
+import socket
+
+def resolve_live_dns(ip_str: Optional[str], timeout_sec: float = 0.35) -> Optional[str]:
     """
-    Mutates and populates endpoint internal status, GeoIP, and ASN data.
+    Resolves reverse DNS (PTR) hostname for public IPs in Public Web Cloud Mode.
+    Strictly bypassed in Air-Gapped mode to prevent DNS exfiltration/leakage.
+    """
+    if not ip_str:
+        return None
+    try:
+        socket.setdefaulttimeout(timeout_sec)
+        host, _, _ = socket.gethostbyaddr(ip_str.strip())
+        return host
+    except (socket.herror, socket.gaierror, socket.timeout, OSError):
+        return None
+
+
+def enrich_endpoints(src: EndpointInfo, dst: EndpointInfo, deployment_mode: str = "air_gapped") -> NetworkDirection:
+    """
+    Mutates and populates endpoint internal status, GeoIP, ASN, and hostname data.
+    In Air-Gapped mode: strictly zero outbound network sockets or DNS queries are executed.
+    In Public Web Cloud mode: executes non-blocking reverse DNS (PTR) for public IPs.
     Returns determined network direction.
     """
     if src.ip:
@@ -103,6 +122,8 @@ def enrich_endpoints(src: EndpointInfo, dst: EndpointInfo) -> NetworkDirection:
             src.city = city
         if not src.asn:
             src.asn = asn
+        if deployment_mode == "internet" and not src.is_internal and not src.hostname:
+            src.hostname = resolve_live_dns(src.ip)
             
     if dst.ip:
         dst.is_internal = is_private_or_internal(dst.ip)
@@ -113,5 +134,7 @@ def enrich_endpoints(src: EndpointInfo, dst: EndpointInfo) -> NetworkDirection:
             dst.city = city
         if not dst.asn:
             dst.asn = asn
+        if deployment_mode == "internet" and not dst.is_internal and not dst.hostname:
+            dst.hostname = resolve_live_dns(dst.ip)
 
     return determine_direction(src.ip, dst.ip)

@@ -850,8 +850,34 @@ textarea#raw-log-input:focus {
 .narrative-badge {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.45rem;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.45rem;
+}
+
+.enclave-status-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.enclave-status-pill.mode-airgap {
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--success);
+    background: var(--success-bg);
+}
+
+.enclave-status-pill.mode-cloud {
+    border-color: rgba(6, 182, 212, 0.3);
+    color: var(--cyan);
+    background: rgba(6, 182, 212, 0.1);
 }
 
 .narrative-icon {

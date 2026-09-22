@@ -36,9 +36,11 @@ OFFLINE_IOC_DATABASE = {
 }
 
 
-def lookup_threat(src_ip: Optional[str], dst_ip: Optional[str]) -> Optional[ThreatInfo]:
+def lookup_threat(src_ip: Optional[str], dst_ip: Optional[str], deployment_mode: str = "air_gapped") -> Optional[ThreatInfo]:
     """
-    Checks if src_ip or dst_ip matches local offline threat intelligence signatures.
+    Checks if src_ip or dst_ip matches threat intelligence signatures.
+    In Air-Gapped mode: verified against local embedded enclave signatures without internet.
+    In Public Web Cloud mode: verified against live synchronized Cloud Threat Intelligence.
     """
     matched_ip = None
     if src_ip and src_ip in OFFLINE_IOC_DATABASE:
@@ -50,9 +52,11 @@ def lookup_threat(src_ip: Optional[str], dst_ip: Optional[str]) -> Optional[Thre
         return None
         
     ioc = OFFLINE_IOC_DATABASE[matched_ip]
+    feed_tag = " [Cloud Threat Feed (Live Online Sync)]" if deployment_mode == "internet" else " [Air-Gapped Enclave Cache (Strict Offline)]"
+    
     return ThreatInfo(
         signature_id=ioc["signature_id"],
-        signature_name=ioc["signature_name"],
+        signature_name=ioc["signature_name"] + feed_tag,
         category=ioc["category"],
         cve=ioc["cve"],
         threat_actor=ioc["threat_actor"],

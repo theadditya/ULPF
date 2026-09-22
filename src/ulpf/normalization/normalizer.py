@@ -62,6 +62,7 @@ class UniversalNormalizer:
         plugin: ParserPlugin,
         confidence: float = 1.0,
         start_time_perf: Optional[float] = None,
+        deployment_mode: str = "air_gapped",
     ) -> UniversalEvent:
         """
         Main normalization routine.
@@ -217,14 +218,14 @@ class UniversalNormalizer:
             if k not in mapped_keys and not k.startswith("_syslog"):
                 event.unmapped[k] = v
 
-        # 6. Air-Gapped Enrichment
-        # Classify RFC 1918 internal/external & direction & GeoIP/ASN
-        direction = enrich_endpoints(event.src_endpoint, event.dst_endpoint)
+        # 6. Mode-Aware Enrichment (Air-Gapped vs Public Cloud)
+        # Classify RFC 1918 internal/external & direction & GeoIP/ASN & Live DNS in Cloud mode
+        direction = enrich_endpoints(event.src_endpoint, event.dst_endpoint, deployment_mode=deployment_mode)
         event.connection_info.direction = direction
 
-        # Offline Threat Intelligence matching (if not already set by firewall)
+        # Threat Intelligence matching (tagged by deployment mode)
         if not event.threat:
-            threat_match = lookup_threat(event.src_endpoint.ip, event.dst_endpoint.ip)
+            threat_match = lookup_threat(event.src_endpoint.ip, event.dst_endpoint.ip, deployment_mode=deployment_mode)
             if threat_match:
                 event.threat = threat_match
                 # If high-confidence threat found, escalate disposition or severity
