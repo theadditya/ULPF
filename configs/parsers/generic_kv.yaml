@@ -1,0 +1,20 @@
+id: "generic_kv"
+name: "Generic Key-Value Perimeter Log Parser"
+vendor: "Generic"
+product: "Network Device"
+version: "1.0"
+format: "key_value"
+strip_syslog_header: true
+
+mapping:
+  "src_endpoint.ip": ["src_ip", "srcip", "src", "source_ip", "saddr"]
+  "src_endpoint.port": ["src_port", "srcport", "spt", "source_port"]
+  "dst_endpoint.ip": ["dst_ip", "dstip", "dst", "destination_ip", "daddr"]
+  "dst_endpoint.port": ["dst_port", "dstport", "dpt", "destination_port"]
+  "connection_info.protocol": ["proto", "protocol", "proto_name"]
+  "traffic.bytes_in": ["bytes_in", "bytes_received", "rcvdbyte", "in"]
+  "traffic.bytes_out": ["bytes_out", "bytes_sent", "sentbyte", "out"]
+  "traffic.total_bytes": ["bytes", "total_bytes"]
+  "disposition.action": ["action", "act", "status"]
+  "severity.level": ["severity", "level", "priority"]
+  "app_name": ["app", "application", "service"]

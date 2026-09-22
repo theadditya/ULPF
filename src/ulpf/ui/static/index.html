@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULPF - Universal Log Pre-processing Framework</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="navbar">
+        <div class="nav-brand">
+            <div class="logo-badge">ULPF</div>
+            <div>
+                <h1>Universal Log Pre-processing Framework</h1>
+                <p class="subtitle">OCSF v1.2 Unified Schema &bull; Lossless Forensic Pipeline &bull; Perimeter Security</p>
+            </div>
+        </div>
+        <div class="nav-badges">
+            <span class="badge badge-success"><span class="pulse"></span> Air-Gapped Mode</span>
+            <span class="badge badge-primary">OCSF Class 4001</span>
+            <span class="badge badge-info">Zero Data-Loss</span>
+        </div>
+    </header>
+
+    <!-- Metrics Bar -->
+    <section class="telemetry-bar">
+        <div class="stat-card">
+            <div class="stat-label">Total Ingested Events</div>
+            <div class="stat-val" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg Processing Latency</div>
+            <div class="stat-val" id="stat-latency">0.00 ms</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active Declarative Parsers</div>
+            <div class="stat-val" id="stat-parsers">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Forensic Hash Integrity</div>
+            <div class="stat-val highlight-green" id="stat-integrity">100.0%</div>
+        </div>
+        <div class="stat-actions">
+            <button class="btn btn-secondary" onclick="loadSampleDataset()">⚡ Ingest Perimeter Samples</button>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="main-container">
+        <!-- Left Column: Parser Studio & Input -->
+        <section class="panel editor-panel">
+            <div class="panel-header">
+                <h2>🧪 Parser Studio &amp; Real-Time Normalizer</h2>
+                <span class="panel-tag">Zero-Shot Detection</span>
+            </div>
+
+            <!-- Sample Selector Buttons -->
+            <div class="sample-pills">
+                <span class="pills-title">Presets:</span>
+                <button class="pill" onclick="selectPreset('palo_alto')">Palo Alto CSV</button>
+                <button class="pill" onclick="selectPreset('cisco_built')">Cisco Built</button>
+                <button class="pill" onclick="selectPreset('cisco_deny')">Cisco Deny</button>
+                <button class="pill" onclick="selectPreset('fortinet')">FortiGate KV</button>
+                <button class="pill" onclick="selectPreset('suricata')">Suricata EVE</button>
+                <button class="pill" onclick="selectPreset('pfsense')">pfSense</button>
+                <button class="pill" onclick="selectPreset('zeek')">Zeek Conn</button>
+                <button class="pill" onclick="selectPreset('cef')">ArcSight CEF</button>
+                <button class="pill" onclick="selectPreset('leef')">IBM LEEF</button>
+            </div>
+
+            <div class="input-container">
+                <label for="raw-log-input">Raw Perimeter Log String:</label>
+                <textarea id="raw-log-input" rows="4" placeholder="Paste any raw Syslog, CEF, LEEF, Key-Value, CSV, or JSON log here..."></textarea>
+            </div>
+
+            <div class="editor-actions">
+                <button class="btn btn-primary" id="btn-process" onclick="processCurrentLog()">▶ Parse &amp; Normalize Event</button>
+                <div id="detection-pill" class="detection-badge" style="display: none;">
+                    Auto-Detected: <span id="detected-parser-name">-</span>
+                </div>
+            </div>
+
+            <!-- Interactive Output Tabs -->
+            <div class="output-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchTab('tab-ocsf')">OCSF v1.2 Standard</button>
+                    <button class="tab-btn" onclick="switchTab('tab-lineage')">Forensic Lineage &amp; SHA-256</button>
+                    <button class="tab-btn" onclick="switchTab('tab-ml')">AI/ML Feature Vector</button>
+                    <button class="tab-btn" onclick="switchTab('tab-unmapped')">Unmapped Retention</button>
+                </div>
+
+                <!-- Tab 1: OCSF JSON -->
+                <div id="tab-ocsf" class="tab-content active">
+                    <pre><code id="code-ocsf">// Standardized OCSF v1.2 Network Activity (Class 4001) output will render here...</code></pre>
+                </div>
+
+                <!-- Tab 2: Forensic Lineage -->
+                <div id="tab-lineage" class="tab-content">
+                    <div id="lineage-summary" class="lineage-box">
+                        <p class="empty-state">No event processed yet.</p>
+                    </div>
+                </div>
+
+                <!-- Tab 3: AI/ML Features -->
+                <div id="tab-ml" class="tab-content">
+                    <div id="ml-container">
+                        <p class="empty-state">No event processed yet.</p>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Unmapped -->
+                <div id="tab-unmapped" class="tab-content">
+                    <div id="unmapped-container">
+                        <pre><code id="code-unmapped">// Preserved vendor-specific raw attributes (100% lossless guarantee)</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Live Event Stream & Forensic Explorer -->
+        <section class="panel stream-panel">
+            <div class="panel-header">
+                <h2>📡 Forensic Event Stream &amp; Data Lake Audit</h2>
+                <button class="btn btn-sm btn-outline" onclick="fetchRecentEvents()">↻ Refresh Stream</button>
+            </div>
+
+            <div class="stream-table-container">
+                <table class="stream-table">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Severity</th>
+                            <th>Vendor / Product</th>
+                            <th>Source Endpoint</th>
+                            <th>Destination Endpoint</th>
+                            <th>Protocol</th>
+                            <th>SHA-256 Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stream-tbody">
+                        <tr>
+                            <td colspan="7" class="empty-row">No events in database. Click "Ingest Perimeter Samples" above to populate.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Universal Log Pre-processing Framework (ULPF) &bull; Enterprise-Grade Security Data Architecture &bull; Aligned with OCSF &amp; ECS</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

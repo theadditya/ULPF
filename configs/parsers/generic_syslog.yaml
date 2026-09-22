@@ -1,0 +1,11 @@
+id: "generic_syslog"
+name: "Generic RFC 3164 / 5424 Syslog Parser"
+vendor: "Generic"
+product: "Syslog Perimeter Relay"
+version: "1.0"
+format: "syslog"
+strip_syslog_header: true
+
+mapping:
+  "severity.level": "_syslog_meta.syslog_severity"
+  "disposition.action": "action"

@@ -1,0 +1,22 @@
+services:
+  ulpf-processor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ulpf-core
+    restart: unless-stopped
+    ports:
+      - "8000:8000"       # Web Dashboard & REST API
+      - "1514:1514/udp"   # High-throughput Syslog UDP
+      - "1514:1514/tcp"   # Syslog TCP
+    volumes:
+      - ./configs/parsers:/app/configs/parsers:ro  # Hot-reloading declarative YAML parsers
+      - ./data:/app/data                          # Persistent Data Lake Parquet & SQLite storage
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ULPF_LOG_LEVEL=INFO
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/telemetry')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3

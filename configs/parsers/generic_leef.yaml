@@ -1,0 +1,25 @@
+id: "generic_leef"
+name: "Log Event Extended Format (LEEF) Parser"
+vendor: "Standard LEEF"
+product: "Perimeter Security Gateway"
+version: "LEEF-2.0"
+format: "leef"
+strip_syslog_header: false
+
+mapping:
+  "src_endpoint.ip": ["src", "srcAddress"]
+  "src_endpoint.port": ["srcPort", "spt"]
+  "dst_endpoint.ip": ["dst", "dstAddress"]
+  "dst_endpoint.port": ["dstPort", "dpt"]
+  "connection_info.protocol": ["proto", "protocol"]
+  "traffic.total_bytes": ["totalBytes", "bytes"]
+  "disposition.action": "action"
+  "severity.level": "sev"
+  "threat.signature_id": "event_id"
+
+value_maps:
+  "disposition.action":
+    "permit": "Allowed"
+    "allow": "Allowed"
+    "block": "Blocked"
+    "deny": "Blocked"

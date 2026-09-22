@@ -1,0 +1,35 @@
+id: "suricata_eve"
+name: "Suricata Network IDS/IPS EVE JSON Parser"
+vendor: "OISF"
+product: "Suricata IDS/IPS Engine"
+version: "7.0"
+format: "json"
+strip_syslog_header: true
+
+mapping:
+  "src_endpoint.ip": "src_ip"
+  "src_endpoint.port": "src_port"
+  "dst_endpoint.ip": "dest_ip"
+  "dst_endpoint.port": "dest_port"
+  "connection_info.protocol": "proto"
+  "connection_info.session_id": "flow_id"
+  "traffic.bytes_in": "flow.bytes_toclient"
+  "traffic.bytes_out": "flow.bytes_toserver"
+  "disposition.action": ["alert.action", "action"]
+  "severity.level": "alert.severity"
+  "app_name": "app_proto"
+  "threat.signature_id": "alert.signature_id"
+  "threat.signature_name": "alert.signature"
+  "threat.category": "alert.category"
+  "timestamp": "timestamp"
+
+value_maps:
+  "disposition.action":
+    "allowed": "Allowed"
+    "blocked": "Blocked"
+    "dropped": "Dropped"
+  "severity.level":
+    "1": "Critical"
+    "2": "High"
+    "3": "Medium"
+    "4": "Low"

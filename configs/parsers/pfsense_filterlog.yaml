@@ -1,0 +1,25 @@
+id: "pfsense_filterlog"
+name: "pfSense / OPNsense Packet Filter Parser"
+vendor: "pfSense / Netgate"
+product: "pfSense Packet Filter (pf)"
+version: "2.7"
+format: "regex"
+strip_syslog_header: true
+
+parser_config:
+  pattern: "(?:filterlog(?::|\\[\\d+\\]:)?\\s*)?(?P<rule>\\d*),(?P<sub_rule>\\d*),(?P<anchor>[^,]*),(?P<tracker>\\d*),(?P<interface>[^,]+),(?P<reason>[^,]+),(?P<action>pass|block),(?P<direction>in|out),(?P<ip_version>\\d),(?P<tos>[^,]*),(?P<ecn>[^,]*),(?P<ttl>\\d*),(?P<id>\\d*),(?P<offset>\\d*),(?P<ip_flags>[^,]*),(?P<proto_id>\\d+),(?P<proto_name>[^,]+),(?P<length>\\d+),(?P<src_ip>[^,]+),(?P<dst_ip>[^,]+),(?P<src_port>\\d+),(?P<dst_port>\\d+)"
+
+mapping:
+  "src_endpoint.ip": "src_ip"
+  "src_endpoint.port": "src_port"
+  "src_endpoint.interface": "interface"
+  "dst_endpoint.ip": "dst_ip"
+  "dst_endpoint.port": "dst_port"
+  "connection_info.protocol": "proto_name"
+  "traffic.total_bytes": "length"
+  "disposition.action": "action"
+
+value_maps:
+  "disposition.action":
+    "pass": "Allowed"
+    "block": "Blocked"

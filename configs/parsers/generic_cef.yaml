@@ -1,0 +1,29 @@
+id: "generic_cef"
+name: "Common Event Format (CEF) Standard Parser"
+vendor: "Standard CEF"
+product: "Perimeter Security Appliance"
+version: "CEF-0.1"
+format: "cef"
+strip_syslog_header: false
+
+mapping:
+  "src_endpoint.ip": "src"
+  "src_endpoint.port": "spt"
+  "dst_endpoint.ip": "dst"
+  "dst_endpoint.port": "dpt"
+  "connection_info.protocol": "proto"
+  "traffic.bytes_in": ["in", "bytesIn", "rcvdbyte"]
+  "traffic.bytes_out": ["out", "bytesOut", "sentbyte"]
+  "disposition.action": "act"
+  "severity.level": "severity"
+  "app_name": ["app", "cs1"]
+  "threat.signature_id": "device_event_class_id"
+  "threat.signature_name": "event_name"
+
+value_maps:
+  "disposition.action":
+    "permit": "Allowed"
+    "allow": "Allowed"
+    "block": "Blocked"
+    "deny": "Blocked"
+    "drop": "Dropped"

@@ -1,0 +1,40 @@
+id: "fortinet_fortios"
+name: "Fortinet FortiGate FortiOS Traffic Parser"
+vendor: "Fortinet"
+product: "FortiGate Next-Gen Firewall"
+version: "7.2.0"
+format: "key_value"
+strip_syslog_header: true
+
+mapping:
+  "src_endpoint.ip": "srcip"
+  "src_endpoint.port": "srcport"
+  "src_endpoint.interface": "srcintf"
+  "dst_endpoint.ip": "dstip"
+  "dst_endpoint.port": "dstport"
+  "dst_endpoint.interface": "dstintf"
+  "connection_info.protocol": "proto"
+  "connection_info.session_id": "sessionid"
+  "traffic.bytes_in": "rcvdbyte"
+  "traffic.bytes_out": "sentbyte"
+  "traffic.duration_ms": "duration"
+  "disposition.action": "action"
+  "severity.level": "level"
+  "app_name": "app"
+  "timestamp": "time"
+
+value_maps:
+  "disposition.action":
+    "accept": "Allowed"
+    "deny": "Blocked"
+    "drop": "Dropped"
+    "close": "Allowed"
+    "client-rst": "Reset"
+    "server-rst": "Reset"
+  "severity.level":
+    "notice": "Low"
+    "warning": "Medium"
+    "error": "High"
+    "critical": "Critical"
+    "alert": "Critical"
+    "information": "Informational"

@@ -1,0 +1,37 @@
+id: "cisco_asa"
+name: "Cisco ASA / Firepower Firewall Parser"
+vendor: "Cisco Systems"
+product: "Cisco Adaptive Security Appliance (ASA)"
+version: "9.18"
+format: "regex"
+strip_syslog_header: true
+
+parser_config:
+  pattern: "(?:%ASA-(?P<severity_digit>\\d)-(?P<msg_id>\\d+):\\s+)(?P<action_verb>Built|Deny|Teardown)\\s+(?:(?P<direction_word>inbound|outbound)\\s+)?(?P<protocol>\\w+)\\s+(?:connection\\s+(?P<conn_id>\\d+)\\s+for\\s+(?P<dst_zone>\\w+):(?P<dst_ip>[\\d\\.]+)/(?P<dst_port>\\d+)(?:\\s+\\([^)]+\\))?\\s+to\\s+(?P<src_zone>\\w+):(?P<src_ip>[\\d\\.]+)/(?P<src_port>\\d+)|src\\s+(?P<src_zone2>\\w+):(?P<src_ip2>[\\d\\.]+)/(?P<src_port2>\\d+)\\s+dst\\s+(?P<dst_zone2>\\w+):(?P<dst_ip2>[\\d\\.]+)/(?P<dst_port2>\\d+))"
+
+mapping:
+  "src_endpoint.ip": ["src_ip", "src_ip2"]
+  "src_endpoint.port": ["src_port", "src_port2"]
+  "src_endpoint.zone": ["src_zone", "src_zone2"]
+  "dst_endpoint.ip": ["dst_ip", "dst_ip2"]
+  "dst_endpoint.port": ["dst_port", "dst_port2"]
+  "dst_endpoint.zone": ["dst_zone", "dst_zone2"]
+  "connection_info.protocol": "protocol"
+  "connection_info.session_id": "conn_id"
+  "disposition.action": "action_verb"
+  "severity.level": "severity_digit"
+  "threat.signature_id": "msg_id"
+
+value_maps:
+  "disposition.action":
+    "built": "Allowed"
+    "deny": "Blocked"
+    "teardown": "Allowed"
+  "severity.level":
+    "1": "Critical"
+    "2": "Critical"
+    "3": "High"
+    "4": "Medium"
+    "5": "Low"
+    "6": "Informational"
+    "7": "Informational"

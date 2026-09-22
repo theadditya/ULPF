@@ -1,0 +1,32 @@
+id: "zeek_conn"
+name: "Zeek / Bro Network Monitor Connection Parser"
+vendor: "Zeek"
+product: "Zeek Network Security Monitor"
+version: "6.0"
+format: "regex"
+strip_syslog_header: true
+
+parser_config:
+  pattern: "^(?P<ts>[\\d\\.]+)\\t(?P<uid>\\w+)\\t(?P<src_ip>[\\d\\.]+)\\t(?P<src_port>\\d+)\\t(?P<dst_ip>[\\d\\.]+)\\t(?P<dst_port>\\d+)\\t(?P<proto>\\w+)\\t(?P<service>[^\\t]+)\\t(?P<duration>[^\\t]+)\\t(?P<orig_bytes>[^\\t]+)\\t(?P<resp_bytes>[^\\t]+)\\t(?P<conn_state>[^\\t]+)"
+
+mapping:
+  "src_endpoint.ip": "src_ip"
+  "src_endpoint.port": "src_port"
+  "dst_endpoint.ip": "dst_ip"
+  "dst_endpoint.port": "dst_port"
+  "connection_info.protocol": "proto"
+  "connection_info.session_id": "uid"
+  "traffic.bytes_in": "resp_bytes"
+  "traffic.bytes_out": "orig_bytes"
+  "traffic.duration_ms": "duration"
+  "disposition.action": "conn_state"
+  "app_name": "service"
+  "timestamp": "ts"
+
+value_maps:
+  "disposition.action":
+    "SF": "Allowed"
+    "S0": "Blocked"
+    "REJ": "Blocked"
+    "RSTO": "Reset"
+    "RSTR": "Reset"
