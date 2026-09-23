@@ -70,7 +70,7 @@
 - **Verbatim Dual-Payload**: Preserves original raw logs with SHA-256 cryptographic provenance for strict legal compliance.
 - **OCSF v1.2 Alignment**: Unifies vendor-specific terminologies (`allow`, `permit`, `pass`, `built` $\to$ `Allowed`) into Class 4001 Network Activity.
 - **Plug-and-Play Onboarding**: New perimeter devices are onboarded via declarative YAML rules without writing or deploying new code.
-- **Air-Gapped & Containerized**: Ready for immediate single-command deployment in zero-trust, isolated defense/banking enclaves.
+- **Air-Gapped & Containerized**: Ready for immediate single-command deployment in zero-trust, isolated defense/banking enclaves via official Docker Hub image (`theadditya/ulpf:latest`) and cryptographically verified GitHub Release `v1.0.0` offline archive (`ulpf-docker-image.tar.gz`).
 
 #### Speaker Notes
 > "ULPF addresses this challenge through four foundational pillars. First, a 100% lossless dual-payload model: we store the original raw log alongside an automated SHA-256 checksum for forensic non-repudiation, and partition unmapped attributes so zero data is ever lost. Second, we standardize all data into the open industry standard: OCSF version 1.2 Network Activity. Third, plug-and-play declarative YAML parsers that onboard any new vendor log in minutes without code changes. And fourth, real-time AI vectorization coupled with total air-gapped readiness."
@@ -159,16 +159,17 @@
 |    🌐 Horizontal Scaling       : 10+ Billion events / day across 16-pod Kubernetes cluster         |
 |                                                                                                    |
 |  TEST SUITE VALIDATION                                                                             |
-|    ✅ 20 / 20 Automated Tests Passed (100% Pass Rate across all modules)                          |
+|    ✅ 23 / 23 Automated Tests Passed (100% Pass Rate across all modules)                          |
 |    ✅ Validated: Palo Alto, Cisco ASA, FortiGate, Suricata, pfSense, Zeek, CEF, LEEF               |
-|    ✅ Docker & Docker-Compose Containerized with Non-Root Security Best Practices                  |
+|    ✅ Production Distribution: Docker Hub (`theadditya/ulpf`) & Air-Gapped Release (`v1.0.0`)     |
+|    ✅ Multi-Stage Hardened Docker Container with Non-Root Security Best Practices                  |
 +----------------------------------------------------------------------------------------------------+
 ```
 
 #### Key Bullet Points
 - **Massive Scalability**: Processes 637M+ events/day on a single core, effortlessly scaling to billions of events per day in multi-node clusters.
-- **Comprehensive Quality Assurance**: 100% automated test coverage spanning parsers, schema validation, lossless retention, and ML vectors.
-- **Ready for Immediate Evaluation**: Includes clean source code, Docker container, setup instructions, 2-page architecture document, and 2-minute video script.
+- **Comprehensive Quality Assurance**: 100% automated test coverage (23/23 tests) spanning parsers, schema validation, lossless retention, and ML vectors.
+- **Multiple Distribution Channels**: Official Docker Hub image (`theadditya/ulpf:latest`), verified air-gapped GitHub Release archive (`ulpf-docker-image.tar.gz`), and Vercel cloud serverless.
 
 #### Speaker Notes
 > "To conclude, let's look at the numbers. On a single commodity CPU core, ULPF sustains over 7,300 events per second with a median latency of 0.12 milliseconds. That extrapolates to over 630 million events per day on one core—meaning a standard 16-node Kubernetes cluster easily handles tens of billions of daily events. The system is backed by a 100% automated test suite, Docker containerization, and a modern SOC dashboard. ULPF is universal, lossless, AI-ready, and built to industry standard. Thank you, and we look forward to your questions."

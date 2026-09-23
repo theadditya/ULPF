@@ -78,4 +78,4 @@
   ./ulpf benchmark --count 10000
   ```
   Show the benchmark table displaying `7,300+ EPS` and `0.12 ms` latency.
-- **Narration**: *"With built-in Apache Parquet, SIEM, and SQLite sinks, ULPF operates completely offline in air-gapped networks. Clocking over 7,000 events per second per core with sub-millisecond latency, ULPF easily scales to billions of daily events. Production-ready, universal, and lossless."*
+- **Narration**: *"With built-in Apache Parquet, SIEM, and SQLite sinks, ULPF operates completely offline in air-gapped networks—distributed via official Docker Hub and verified GitHub Release offline bundles. Clocking over 7,000 events per second per core with sub-millisecond latency, ULPF easily scales to billions of daily events. Production-ready, universal, and lossless."*

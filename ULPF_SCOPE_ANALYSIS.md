@@ -78,8 +78,8 @@ ULPF is purpose-built for the **perimeter network and security gateway domain**:
 5. **Universal Perimeter Standards**: Generic ArcSight CEF, Generic IBM LEEF 1.0/2.0, Generic Delimited Key-Value, Generic RFC 3164/5424 Syslog relays.
 
 ### 1.3 Deployment Scope
-* **Air-Gapped Enclaves**: 100% self-contained operation with zero outbound network calls, suitable for classified defense networks (SIPRNet), nuclear/SCADA facilities, and financial transaction enclaves.
-* **Public Web Cloud**: Serverless and containerized deployment (Docker, Kubernetes, Vercel Serverless) with ephemeral data fallbacks and cloud egress routing.
+* **Air-Gapped Enclaves**: 100% self-contained operation with zero outbound network calls, suitable for classified defense networks (SIPRNet), nuclear/SCADA facilities, and financial transaction enclaves. Distributed as a standalone verified container bundle ([`ulpf-docker-image.tar.gz`](https://github.com/theadditya/ULPF/releases/download/v1.0.0/ulpf-docker-image.tar.gz) on GitHub Release `v1.0.0`) for physical media transfer.
+* **Public Web Cloud**: Serverless and containerized deployment (Docker Hub repository: [`theadditya/ulpf`](https://hub.docker.com/r/theadditya/ulpf), Kubernetes, Vercel Serverless) with ephemeral data fallbacks and cloud egress routing.
 * **High-Throughput Edge Nodes**: Can run as an edge sidecar, daemon, or forwarder tier in branch offices and enterprise ingress points.
 
 ---
@@ -125,7 +125,7 @@ flowchart TD
 
 ### 2.5 Defense, Government, and Critical Infrastructure Enclave Operators
 * **Pain Point**: Modern security platforms frequently phone home for license verification, cloud-based threat intelligence, or GeoIP resolution, violating strict isolation mandates in SCADA, military, or banking environments.
-* **Value Delivered**: 100% offline, self-contained architecture. Packaged as a single portable Docker tarball (`ulpf-docker-image.tar.gz`) that can be loaded via physical media (USB) into air-gapped networks. Uses embedded subnets and local threat databases with zero external network connectivity.
+* **Value Delivered**: 100% offline, self-contained architecture. Packaged as a verified portable Docker tarball ([`ulpf-docker-image.tar.gz`](https://github.com/theadditya/ULPF/releases/download/v1.0.0/ulpf-docker-image.tar.gz), SHA-256 verified) on GitHub Releases that can be transferred via physical media (USB / data diode) into air-gapped networks, as well as published to Docker Hub ([`theadditya/ulpf`](https://hub.docker.com/r/theadditya/ulpf)) for connected jump-hosts. Uses embedded subnets and local threat databases with zero external network connectivity.
 
 ### 2.6 Chief Information Security Officers (CISOs) & Security FinOps
 * **Pain Point**: Astronomical and unpredictable SIEM ingestion bills (Splunk, Microsoft Sentinel, Datadog charge between \$2.50 to \$5.00+ per GB/day). Up to 70% of firewall logs are mundane "allow" traffic that never triggers an alert.

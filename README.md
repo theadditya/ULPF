@@ -1,9 +1,11 @@
 # Universal Log Pre-processing Framework (ULPF)
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Release: v1.0.0](https://img.shields.io/badge/Release-v1.0.0-blue.svg?logo=github)](https://github.com/theadditya/ULPF/releases/tag/v1.0.0)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-theadditya%2Fulpf-2496ED.svg?logo=docker&logoColor=white)](https://hub.docker.com/r/theadditya/ulpf)
 [![Schema: OCSF v1.2](https://img.shields.io/badge/Schema-OCSF%20v1.2%20(Network%204001)-green.svg)](https://schema.ocsf.io)
 [![Tests: Pytest](https://img.shields.io/badge/Tests-23%2F23%20Passed-brightgreen.svg)]()
-[![Air-Gapped: Ready](https://img.shields.io/badge/Air--Gapped-100%25%20Offline-orange.svg)]()
+[![Air-Gapped: Ready](https://img.shields.io/badge/Air--Gapped-100%25%20Offline-orange.svg)](https://github.com/theadditya/ULPF/releases/download/v1.0.0/ulpf-docker-image.tar.gz)
 
 > **Production-Grade Universal Log Pre-processing & Normalization Engine for Perimeter Network Devices**  
 > Converts heterogeneous logs (Syslog, CEF, LEEF, Key-Value, CSV, JSON) into lossless, analytics-ready representations for next-generation SIEMs, Big Data Lakes, and AI/ML detection pipelines.
@@ -17,13 +19,15 @@
 - [System Architecture](#system-architecture)
 - [Quick Start Guide](#quick-start-guide)
   - [Prerequisites](#prerequisites)
-  - [Local Installation](#local-installation)
-  - [Docker & Containerized Deployment](#docker--containerized-deployment)
-- [Packaging & Image Creation](#packaging--image-creation)
-  - [Building Docker Container Image](#1-building-docker-container-image)
-  - [Exporting Image for Offline Air-Gapped Transfer](#2-exporting-image-for-offline-air-gapped-transfer)
-  - [Capturing Full-Page Visual Screenshot](#3-capturing-full-page-visual-screenshot)
-- [Vercel Cloud Deployment](#vercel-cloud-deployment)
+  - [1. Quick Start via Docker Hub (Fastest)](#1-quick-start-via-docker-hub-fastest)
+  - [2. Local Python Installation](#2-local-python-installation)
+  - [3. Docker & Docker-Compose (Local Stack)](#3-docker--docker-compose-local-stack)
+- [Air-Gapped Enclave & Offline Deployment](#-air-gapped-enclave--offline-deployment)
+  - [Method 1: Direct GitHub Release Download (Air-Gapped Enclaves)](#method-1-direct-github-release-download-air-gapped-enclaves)
+  - [Method 2: Pull from Docker Hub & Export for Air-Gapped Transfer](#method-2-pull-from-docker-hub--export-for-air-gapped-transfer)
+  - [Method 3: Build & Export Container from Source](#method-3-build--export-container-from-source)
+- [Visual Full-Page Screenshot](#-visual-full-page-screenshot)
+- [Vercel Cloud Deployment](#-vercel-cloud-deployment)
 - [CLI Tool Reference](#cli-tool-reference)
 - [Web Dashboard & Parser Studio](#web-dashboard--parser-studio)
 - [AI/ML Security Feature Extraction](#aiml-security-feature-extraction)
@@ -128,12 +132,29 @@ Modern enterprises generate billions of daily events across heterogeneous perime
 - Python 3.10+ (tested on Python 3.12)
 - Optional: Docker & Docker Compose
 
-### Local Installation
+### 1. Quick Start via Docker Hub (Fastest)
+
+Pull and run the official pre-built image directly from Docker Hub:
+
+```bash
+# Pull official image
+docker pull theadditya/ulpf:latest
+
+# Run container (Web UI on 8000, Syslog UDP ingestion on 1514)
+docker run -d \
+  --name ulpf \
+  -p 8000:8000 \
+  -p 1514:1514/udp \
+  theadditya/ulpf:latest
+```
+Access the SOC Web Dashboard and Parser Studio at `http://localhost:8000`.
+
+### 2. Local Python Installation
 
 ```bash
 # 1. Clone repository
-git clone <repo-url>
-cd ulpf-framework
+git clone https://github.com/theadditya/ULPF.git
+cd ULPF
 
 # 2. Set up virtual environment and install dependencies
 python3 -m venv .venv
@@ -149,11 +170,11 @@ pytest -v
 # 5. Launch the SOC Web Dashboard & REST API
 ./ulpf serve --host 0.0.0.0 --port 8000
 ```
-Open **`http://localhost:8000`** in your browser to access the Parser Studio!
+Open `http://localhost:8000` in your browser to access the Parser Studio!
 
-### Docker & Containerized Deployment
+### 3. Docker & Docker-Compose (Local Stack)
 
-Launch the entire stack with a single command via [`docker-compose.yml`](docker-compose.yml):
+Launch the entire stack from source with a single command via [`docker-compose.yml`](docker-compose.yml):
 
 ```bash
 # Build and run container stack in background
@@ -165,46 +186,85 @@ docker compose logs -f
 
 ---
 
-## 📦 Packaging & Image Creation
+## 🛡️ Air-Gapped Enclave & Offline Deployment
 
-ULPF supports both **software container packaging** for production/air-gapped defense enclaves and **visual full-page capture** for executive reports and architectural reviews:
+ULPF is purpose-built for zero-trust, classified defense networks (SIPRNet, SCADA, financial trading zones) with **zero internet connectivity** and **zero outbound phone-home pings**.
 
-### 1. Building Docker Container Image
+Choose the deployment method that fits your environment:
 
-The project provides a hardened, multi-stage, non-root [`Dockerfile`](Dockerfile) (`user: ulpf (10001)`) for defense-grade security:
+### Method 1: Direct GitHub Release Download (Air-Gapped Enclaves)
+
+If you are deploying directly to an isolated network without access to public registries:
+
+1. **Download Official Release Asset**:
+   Download the pre-packaged container archive from GitHub Releases:
+   - **Release Tag**: [`v1.0.0`](https://github.com/theadditya/ULPF/releases/tag/v1.0.0)
+   - **Direct Download**: [`ulpf-docker-image.tar.gz`](https://github.com/theadditya/ULPF/releases/download/v1.0.0/ulpf-docker-image.tar.gz) *(~142 MB compressed)*
+
+2. **Verify Cryptographic SHA-256 Checksum**:
+   ```bash
+   sha256sum ulpf-docker-image.tar.gz
+   ```
+   *Expected Checksum:*
+   ```text
+   d869b7c6d662313628ac6a36b3aed3560b6b495348549fc9bac9cb1e015e712f  ulpf-docker-image.tar.gz
+   ```
+
+3. **Transfer & Load in Air-Gapped Machine**:
+   Copy the archive to your target enclave machine via authorized physical media (USB / Data Diode) and load it into Docker:
+   ```bash
+   # Load image into Docker offline (no internet required)
+   docker load < ulpf-docker-image.tar.gz
+
+   # Run container
+   docker run -d \
+     --name ulpf \
+     -p 8000:8000 \
+     -p 1514:1514/udp \
+     ulpf:latest
+   ```
+
+### Method 2: Pull from Docker Hub & Export for Air-Gapped Transfer
+
+If you have a connected jump-host or staging workstation:
 
 ```bash
-# Build the production Docker image
-docker build -t ulpf:latest .
+# 1. On connected jump-host: Pull official image
+docker pull theadditya/ulpf:latest
 
-# Run container with REST API / UI (8000) and Syslog UDP (1514)
+# 2. Export and compress image to a portable tarball
+docker save theadditya/ulpf:latest | gzip > ulpf-docker-image.tar.gz
+
+# 3. Transfer ulpf-docker-image.tar.gz via physical media to air-gapped host
+
+# 4. On air-gapped host: Load and run
+docker load < ulpf-docker-image.tar.gz
 docker run -d \
-  --name ulpf-app \
+  --name ulpf \
   -p 8000:8000 \
   -p 1514:1514/udp \
-  ulpf:latest
+  theadditya/ulpf:latest
 ```
-Access the SOC operations dashboard at `http://localhost:8000`.
 
-### 2. Exporting Image for Offline Air-Gapped Transfer
+### Method 3: Build & Export Container from Source
 
-In classified or isolated defense networks (SCADA, SIPRNet, financial data enclaves) without internet access, export the built container image into a single portable archive:
+To inspect the build pipeline and compile your own hardened image from source:
 
 ```bash
-# Export container image to compressed archive (101 MB)
+# 1. Build using the production Dockerfile
+docker build -t ulpf:latest .
+
+# 2. Export to compressed archive
 docker save ulpf:latest | gzip > ulpf-docker-image.tar.gz
-```
 
-**To deploy on any target offline machine (via USB flash drive):**
-```bash
-# Load container image into Docker without internet access
+# 3. Load on target machine
 docker load < ulpf-docker-image.tar.gz
-
-# Run container
 docker run -d -p 8000:8000 -p 1514:1514/udp ulpf:latest
 ```
 
-### 3. Capturing Full-Page Visual Screenshot
+---
+
+## 📸 Visual Full-Page Screenshot
 
 Capture a high-resolution, full-page visual screenshot of the entire running dashboard (Hero, Parser Studio, and 3-Phase Pipeline):
 

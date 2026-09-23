@@ -110,11 +110,12 @@ Cybersecurity machine learning pipelines require clean numerical vectors. ULPF e
 - **Traffic Dynamics**: Log-scaled volume ($\log_{1p}(\text{bytes})$), directional flow ratios ($\frac{\log_{1p}(\text{bytes\_out})}{\log_{1p}(\text{bytes\_in}) + 1}$), connection duration, and transfer rate ($\text{bytes/sec}$).
 - **Security & Direction**: One-hot protocol encodings (TCP/UDP/ICMP), directional vectors (Inbound, Outbound, Lateral), binary action flags, and threat confidence scores.
 
-#### 3.5 Air-Gapped Network Readiness
-ULPF is designed to operate in completely isolated, air-gapped networks (e.g., defense, critical infrastructure, financial datacenters):
-- **Zero External Calls**: No cloud dependencies or internet phone-home routines.
-- **Embedded RFC 1918 Trie**: High-speed offline private subnet classifier.
-- **Local Threat Intelligence**: Embedded offline IoC cache for instantaneous indicator matching without external DNS or API resolution.
+#### 3.5 Air-Gapped Network Readiness & Secure Distribution
+ULPF is architected for zero-trust, isolated enclaves (e.g., defense networks, SIPRNet, SCADA utilities, and financial core datacenters):
+- **Zero Outbound Telemetry**: Zero external cloud calls, no licensing phone-home, and no dynamic remote lookups.
+- **Embedded Subnet & Threat Engine**: In-memory RFC 1918 CIDR trie and pre-indexed local threat indicator cache for sub-microsecond classification without external DNS or API dependencies.
+- **Cryptographically Verified Distribution**: Available as a standalone, offline container bundle via GitHub Release `v1.0.0` (`ulpf-docker-image.tar.gz`, SHA-256 verified) for physical air-gap transfer, as well as via the official Docker Hub repository (`theadditya/ulpf:latest`, `v1.0.0`) for connected staging environments.
+- **Tamper-Evident Enclave Lineage**: Automatic SHA-256 raw payload hashing preserves non-repudiation and evidential integrity in high-security forensic investigations.
 
 ---
 
