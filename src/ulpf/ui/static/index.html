@@ -33,11 +33,13 @@
             <div class="mode-selector-wrap" title="Toggle between Air-Gapped Defense Enclave and Public Web Cloud mode">
                 <button class="mode-pill active" id="btn-mode-airgap" onclick="setDeploymentMode('air_gapped')">
                     <span class="mode-dot"></span>
-                    <span>Air-Gapped Enclave</span>
+                    <span class="mode-text-long">Air-Gapped Enclave</span>
+                    <span class="mode-text-short">Air-Gap</span>
                 </button>
                 <button class="mode-pill" id="btn-mode-web" onclick="setDeploymentMode('internet')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                    <span>Public Web Cloud</span>
+                    <span class="mode-text-long">Public Web Cloud</span>
+                    <span class="mode-text-short">Web Cloud</span>
                 </button>
             </div>
 
@@ -60,9 +62,9 @@
             </button>
 
             <!-- Guide Modal Button -->
-            <button class="btn btn-secondary btn-sm" onclick="toggleHelpModal()">
+            <button class="btn btn-secondary btn-sm nav-guide-btn" onclick="toggleHelpModal()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                Architecture Guide
+                <span class="guide-btn-text">Architecture Guide</span>
             </button>
         </div>
     </header>
